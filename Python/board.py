@@ -6,6 +6,7 @@ class Board:
         self.square_difference = 0
         self.turn_count = 0
         self.whose_turn = 1
+        self.unmake_list = []
 
         for i in range(self.size):
             row = []
@@ -48,6 +49,25 @@ class Board:
     def advance_turn(self, skipped):
         if not skipped:
             self.turn_count += 1
+        else:
+            self.unmake_list.append(-1)
+
+        self.whose_turn = (self.whose_turn*2) % 3
+
+
+    def retract_turn(self):
+        prev_turn = self.unmake_list.pop()
+
+        if prev_turn[0] == -1:
+            self.whose_turn = (self.whose_turn*2) % 3
+            return
+        
+        prev_move = prev_turn.pop(0)
+        self.board[prev_move[0]][prev_move[1]] = 0
+
+        for i, j in prev_turn:
+            self.board[i][j] = self.whose_turn
+
         self.whose_turn = (self.whose_turn*2) % 3
 
 
@@ -300,13 +320,18 @@ class Board:
         if player == 2:
             modifier = -1
 
+        squares_flipped = [move]
+
         self.board[move[0]][move[1]] = player
         self.square_difference += modifier
 
         for line in squares:
             for square in line:
+                squares_flipped.append(square)
                 self.board[square[0]][square[1]] = player
                 self.square_difference += (modifier*2)
+
+        self.unmake_list.append(squares_flipped)
  
 
     def game_over(self):
