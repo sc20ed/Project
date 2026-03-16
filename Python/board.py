@@ -16,7 +16,7 @@ class Board:
             self.board.append(row)
 
         self.setup()
-        print(self.frontier)
+        #print(self.frontier)
 
 
     def setup(self):
@@ -26,11 +26,12 @@ class Board:
         self.board[midpoint][midpoint] = 1
         self.board[midpoint][midpoint-1] = 2
 
+        """
         self.update_frontier((midpoint-1, midpoint))
         self.update_frontier((midpoint-1, midpoint-1))
         self.update_frontier((midpoint, midpoint))
         self.update_frontier((midpoint, midpoint-1))
-
+        """
 
 
     def reset(self):
