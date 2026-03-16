@@ -4,6 +4,7 @@ class Board:
         self.size = size + 2
         self.frontier = set()
         self.square_difference = 0
+        self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
         self.unmake_list = []
@@ -48,15 +49,21 @@ class Board:
 
     def advance_turn(self, skipped):
         if not skipped:
-            self.turn_count += 1
+            self.move_count += 1
         else:
-            self.unmake_list.append(-1)
+            self.unmake_list.append([-1, -1])
 
+        self.turn_count += 1
         self.whose_turn = (self.whose_turn*2) % 3
 
 
     def retract_turn(self):
-        prev_turn = self.unmake_list.pop()
+        try:
+            prev_turn = self.unmake_list.pop()
+        except IndexError:
+            return
+        
+        self.turn_count -= 1
 
         if prev_turn[0] == -1:
             self.whose_turn = (self.whose_turn*2) % 3
@@ -68,6 +75,7 @@ class Board:
         for i, j in prev_turn:
             self.board[i][j] = self.whose_turn
 
+        self.move_count -= 1
         self.whose_turn = (self.whose_turn*2) % 3
 
 
@@ -335,6 +343,7 @@ class Board:
  
 
     def game_over(self):
+        self.turn_count -= 2
         p1_total = 0
         p2_total = 0
 
@@ -348,6 +357,7 @@ class Board:
         print(p1_total)
         print(p2_total)
         print("Turn", self.turn_count)
+        print("Moves", self.move_count)
         print("Heuristic =", self.heuristics())
 
 

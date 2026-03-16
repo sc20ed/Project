@@ -19,7 +19,10 @@ def turn(board, move_select):
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, _ = minimax(board, 4, False)
+        move, _ = minimax(board, 2, True)
+    elif move_select == 2:
+        choice = ("minimax")
+        move, _ = minimax(board, 2, False)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
         if choice > len(moves) or choice < 0:
@@ -44,7 +47,7 @@ def cpu_game():
     while active == 1:
         p1_can_move = turn(gameboard, 0)
         gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 1)
+        p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
         
         if p1_can_move == 1 and p2_can_move == 1:
@@ -52,7 +55,7 @@ def cpu_game():
 
     print("")
     print("GAME OVER")
-    print(gameboard.game_over())
+    gameboard.game_over()
 
 
 def player_game():
@@ -61,9 +64,9 @@ def player_game():
 
     active = 1
     while active == 1:
-        p1_can_move = turn(gameboard, 2)
+        p1_can_move = turn(gameboard, 3)
         gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 1)
+        p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
         
         if p1_can_move == 1 and p2_can_move == 1:
