@@ -2,11 +2,12 @@ class Board:
     def __init__(self, size=8):
         self.board = []
         self.size = size + 2
-        self.frontier = set()
+        #self.frontier = set()
         self.square_difference = 0
         self.turn_count = 0
         self.whose_turn = 1
         self.unmake_list = []
+        #self.frontier_unmake_list = []
 
         for i in range(self.size):
             row = []
@@ -15,7 +16,7 @@ class Board:
             self.board.append(row)
 
         self.setup()
-        print(self.frontier)
+        #print(self.frontier)
 
 
     def setup(self):
@@ -25,11 +26,17 @@ class Board:
         self.board[midpoint][midpoint] = 1
         self.board[midpoint][midpoint-1] = 2
 
+        """
+        self.frontier.add((midpoint-1, midpoint))
+        self.frontier.add((midpoint-1, midpoint-1))
+        self.frontier.add((midpoint, midpoint))
+        self.frontier.add((midpoint, midpoint-1))
+
         self.update_frontier((midpoint-1, midpoint))
         self.update_frontier((midpoint-1, midpoint-1))
         self.update_frontier((midpoint, midpoint))
         self.update_frontier((midpoint, midpoint-1))
-
+        """
 
 
     def reset(self):
@@ -50,47 +57,99 @@ class Board:
         if not skipped:
             self.turn_count += 1
         else:
-            self.unmake_list.append(-1)
+            self.unmake_list.append([-1, -1])
 
         self.whose_turn = (self.whose_turn*2) % 3
 
 
     def retract_turn(self):
+        print(self.unmake_list)
         prev_turn = self.unmake_list.pop()
+        #prev_frontier_change = self.frontier_unmake_list.pop()
+        print(prev_turn)
 
         if prev_turn[0] == -1:
             self.whose_turn = (self.whose_turn*2) % 3
+            print("YES\n\n!!")
             return
-        
-        prev_move = prev_turn.pop(0)
-        self.board[prev_move[0]][prev_move[1]] = 0
+        else:
+            prev_move = prev_turn.pop(0)
+            self.board[prev_move[0]][prev_move[1]] = 0
+            #self.frontier.add(prev_move)
 
-        for i, j in prev_turn:
-            self.board[i][j] = self.whose_turn
+            for i, j in prev_turn:
+                self.board[i][j] = self.whose_turn
 
         self.whose_turn = (self.whose_turn*2) % 3
+        self.turn_count -= 1
+
+        """
+        for i, j in prev_frontier_change:
+            self.frontier.remove((i, j))
+        
+        print("")
+        print(self.frontier)
+        print(prev_frontier_change)
+        print(self.frontier)
+        print("")
+        """
 
 
+    """
     def update_frontier(self, move):
+        self.frontier.remove(move)
         x = move[0]
         y = move[1]
 
+        new_frontier = []
+
         if self.board[x][y+1] == 0 and y < 8:
             self.frontier.add((x, y+1))
+            if (x, y+1) not in self.frontier:
+                new_frontier.append((x, y+1))
+
         if self.board[x][y-1] == 0 and y > 1:
             self.frontier.add((x, y-1))
+            if (x, y+1) not in self.frontier:
+                new_frontier.append((x, y-1))
+
         if self.board[x+1][y] == 0 and x < 8:
             self.frontier.add((x+1, y))
+            if (x, y+1) not in self.frontier:
+                new_frontier.append((x+1, y))
+
         if self.board[x-1][y] == 0 and x > 1:
             self.frontier.add((x-1, y))
+            if (x, y+1) not in self.frontier:
+                new_frontier.append((x-1, y))
+
         if self.board[x+1][y+1] == 0 and x < 8 and y < 8:
             self.frontier.add((x+1, y+1))
+            if (x, y+1) not in self.frontier:
+                new_frontier.append((x+1, y+1))
+
         if self.board[x+1][y-1] == 0 and x < 8 and y > 1:
             self.frontier.add((x+1, y-1))
+            if (x, y+1) not in self.frontier:
+                new_frontier.append((x+1, y-1))
+
         if self.board[x-1][y+1] == 0 and x > 1 and y < 8:
             self.frontier.add((x-1, y+1))
+            if (x, y+1) not in self.frontier:
+            new_frontier.append((x-1, y+1))
+
         if self.board[x-1][y-1] == 0 and x > 1 and y > 1:
             self.frontier.add((x-1, y-1))
+            new_frontier.append((x-1, y-1))
+
+        self.frontier_unmake_list.append(new_frontier)
+
+        print("")
+        print(self.frontier)
+        print(move)
+        print(new_frontier)
+        print("")
+    """
 
 
     def find_frontier(self, opponent):
@@ -196,10 +255,12 @@ class Board:
 
     
     def find_moves(self, player, opponent):
-        #frontier = self.find_frontier(opponent)
+
+        # FRONTIER CHANGED HERE
+        frontier = self.find_frontier(opponent)
         moves = []
         
-        for square in self.frontier:
+        for square in frontier:
             if (self.validate_move(player, opponent, square)):
                 moves.append(square)
 
@@ -311,25 +372,27 @@ class Board:
                     break
 
         self.flip(player, move, flip_squares)
-        self.frontier.remove(move)
-        self.update_frontier(move)
+        #self.update_frontier(move)
 
 
     def flip(self, player, move, squares):
+        """
         modifier = 1
         if player == 2:
             modifier = -1
+        """
 
         squares_flipped = [move]
 
         self.board[move[0]][move[1]] = player
-        self.square_difference += modifier
+        #self.square_difference += modifier
 
         for line in squares:
             for square in line:
                 squares_flipped.append(square)
                 self.board[square[0]][square[1]] = player
-                self.square_difference += (modifier*2)
+
+                #self.square_difference += (modifier*2)
 
         self.unmake_list.append(squares_flipped)
  
@@ -365,7 +428,16 @@ class Board:
     def heuristics(self):
         # naive heuristics first
         # total squares
-        return self.square_difference
+        score = 0
+
+        for i in range(1, self.size-1):
+            for j in range(1, self.size-1):
+                if self.board[i][j] == 1:
+                    score += 1
+                elif self.board[i][j] == 2:
+                    score -= 1
+
+        return score
         
 
     

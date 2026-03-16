@@ -10,26 +10,26 @@ class GameTree:
 # basic minimax
 def minimax(board, depth, maximising):
     if depth == 0 or board.turn_count >= 60:
-        return None, board.heuristics()
+        temp_score = board.heuristics()
+        board.retract_turn()
+        return None, temp_score
     
     if maximising:
         score = -9999
         moves = board.find_moves(1, 2)
 
         if len(moves) == 0:
-            temp_board = deepcopy(board)
-            temp_board.advance_turn(1)
-            _, temp_score = minimax(temp_board, depth-1, False)
+            board.advance_turn(1)
+            _, temp_score = minimax(board, depth-1, False)
 
             if temp_score > score:
                 score = temp_score
                 best_move = (-1, -1)
 
         for move in moves:
-            temp_board = deepcopy(board)
-            temp_board.make_move(1, 2, move)
-            temp_board.advance_turn(0)
-            _, temp_score = minimax(temp_board, depth-1, False)
+            board.make_move(1, 2, move)
+            board.advance_turn(0)
+            _, temp_score = minimax(board, depth-1, False)
 
             if temp_score > score:
                 score = temp_score
@@ -40,23 +40,23 @@ def minimax(board, depth, maximising):
         moves = board.find_moves(2, 1)
 
         if len(moves) == 0:
-            temp_board = deepcopy(board)
-            temp_board.advance_turn(1)
-            _, temp_score = minimax(temp_board, depth-1, True)
+            board.advance_turn(1)
+            _, temp_score = minimax(board, depth-1, True)
 
             if temp_score < score:
                 score = temp_score
                 best_move = (-1, -1)
 
         for move in board.find_moves(2, 1):
-            temp_board = deepcopy(board)
-            temp_board.make_move(2, 1, move)
-            temp_board.advance_turn(0)
-            _, temp_score = minimax(temp_board, depth-1, True)
+            board.make_move(2, 1, move)
+            board.advance_turn(0)
+            _, temp_score = minimax(board, depth-1, True)
 
             if temp_score < score:
                 score = temp_score
                 best_move = move
+
+    board.retract_turn()
 
     return best_move, score
     
