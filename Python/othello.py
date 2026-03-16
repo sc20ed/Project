@@ -2,6 +2,7 @@ from random import randint
 from board import Board
 from minimax import minimax
 
+
 def turn(board, move_select):
     print(board.turn_count)
     player = board.whose_turn
@@ -11,18 +12,15 @@ def turn(board, move_select):
     if len(moves) == 0:
         return 1
     
-    if board.turn_count > 50 and move_select == 1:
-        move_select = 0
-    
     if move_select == 0:
         choice = randint(0, len(moves)-1)
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, _ = minimax(board, 2, True)
+        move, _ = minimax(board, 4, True)
     elif move_select == 2:
         choice = ("minimax")
-        move, _ = minimax(board, 2, False)
+        move, _ = minimax(board, 4, False)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
         if choice > len(moves) or choice < 0:

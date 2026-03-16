@@ -52,7 +52,7 @@ class Board:
         if not skipped:
             self.move_count += 1
         else:
-            self.unmake_list.append([-1, -1])
+            self.unmake_list.append([self.square_difference, -1])
 
         self.turn_count += 1
         self.whose_turn = (self.whose_turn*2) % 3
@@ -66,7 +66,7 @@ class Board:
         
         self.turn_count -= 1
 
-        if prev_turn[0] == -1:
+        if prev_turn[1] == -1:
             self.whose_turn = (self.whose_turn*2) % 3
             return
         
