@@ -35,23 +35,23 @@ class Board:
         self.board[midpoint][midpoint-1] = 2
 
         # switch to file later
-        self.weight_grid[1][1] = 20
-        self.weight_grid[1][self.size-2] = 20
-        self.weight_grid[self.size-2][1] = 20
-        self.weight_grid[self.size-2][self.size-2] = 20
+        self.weight_grid[1][1] = 50
+        self.weight_grid[1][self.size-2] = 50
+        self.weight_grid[self.size-2][1] = 50
+        self.weight_grid[self.size-2][self.size-2] = 50
 
-        self.weight_grid[2][1] = -10
-        self.weight_grid[1][2] = -10
-        self.weight_grid[2][2] = -10
-        self.weight_grid[2][self.size-2] = -10
-        self.weight_grid[1][self.size-3] = -10
-        self.weight_grid[2][self.size-3] = -10
-        self.weight_grid[self.size-3][1] = -10
-        self.weight_grid[self.size-2][2] = -10
-        self.weight_grid[self.size-3][2] = -10
-        self.weight_grid[self.size-3][self.size-2] = -10
-        self.weight_grid[self.size-2][self.size-3] = -10
-        self.weight_grid[self.size-3][self.size-3] = -10
+        self.weight_grid[2][1] = -25
+        self.weight_grid[1][2] = -25
+        self.weight_grid[2][2] = -25
+        self.weight_grid[2][self.size-2] = -25
+        self.weight_grid[1][self.size-3] = -25
+        self.weight_grid[2][self.size-3] = -25
+        self.weight_grid[self.size-3][1] = -25
+        self.weight_grid[self.size-2][2] = -25
+        self.weight_grid[self.size-3][2] = -25
+        self.weight_grid[self.size-3][self.size-2] = -25
+        self.weight_grid[self.size-2][self.size-3] = -25
+        self.weight_grid[self.size-3][self.size-3] = -25
 
 
         """
@@ -420,7 +420,7 @@ class Board:
         score = (self.square_difference +
                 self.wg_score)
 
-        return self.square_difference
+        return score
         
 
     

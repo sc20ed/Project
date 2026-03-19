@@ -17,10 +17,12 @@ def turn(board, move_select):
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, _ = minimax(board, 4, True)
+        move, score = minimax(board, 4, True)
+        print(score)
     elif move_select == 2:
         choice = ("minimax")
-        move, _ = minimax(board, 4, False)
+        move, score = minimax(board, 4, False)
+        print(score)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
         if choice > len(moves) or choice < 0:
@@ -67,7 +69,9 @@ def player_game():
         p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
 
+        print("\nScore")
         print(gameboard.heuristics())
+        print("")
         
         if p1_can_move == 1 and p2_can_move == 1:
             active = 0
