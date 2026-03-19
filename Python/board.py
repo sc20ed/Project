@@ -35,23 +35,23 @@ class Board:
         self.board[midpoint][midpoint-1] = 2
 
         # switch to file later
-        self.weight_grid[1][1] = 10
-        self.weight_grid[1][self.size-2] = 10
-        self.weight_grid[self.size-2][1] = 10
-        self.weight_grid[self.size-2][self.size-2] = 10
+        self.weight_grid[1][1] = 20
+        self.weight_grid[1][self.size-2] = 20
+        self.weight_grid[self.size-2][1] = 20
+        self.weight_grid[self.size-2][self.size-2] = 20
 
-        self.weight_grid[2][1] = -5
-        self.weight_grid[1][2] = -5
-        self.weight_grid[2][2] = -5
-        self.weight_grid[2][self.size-2] = -5
-        self.weight_grid[1][self.size-3] = -5
-        self.weight_grid[2][self.size-3] = -5
-        self.weight_grid[self.size-3][1] = -5
-        self.weight_grid[self.size-2][2] = -5
-        self.weight_grid[self.size-3][2] = -5
-        self.weight_grid[self.size-3][self.size-2] = -5
-        self.weight_grid[self.size-2][self.size-3] = -5
-        self.weight_grid[self.size-3][self.size-3] = -5
+        self.weight_grid[2][1] = -10
+        self.weight_grid[1][2] = -10
+        self.weight_grid[2][2] = -10
+        self.weight_grid[2][self.size-2] = -10
+        self.weight_grid[1][self.size-3] = -10
+        self.weight_grid[2][self.size-3] = -10
+        self.weight_grid[self.size-3][1] = -10
+        self.weight_grid[self.size-2][2] = -10
+        self.weight_grid[self.size-3][2] = -10
+        self.weight_grid[self.size-3][self.size-2] = -10
+        self.weight_grid[self.size-2][self.size-3] = -10
+        self.weight_grid[self.size-3][self.size-3] = -10
 
 
         """
@@ -99,6 +99,7 @@ class Board:
             return
         
         self.square_difference = prev_turn.pop(0)
+        self.wg_score = prev_turn.pop(0)
         prev_move = prev_turn.pop(0)
         self.board[prev_move[0]][prev_move[1]] = 0
 
@@ -360,7 +361,7 @@ class Board:
         if player == 2:
             modifier = -1
 
-        turn_change = [self.square_difference, move]
+        turn_change = [self.square_difference, self.wg_score, move]
 
         self.board[move[0]][move[1]] = player
         self.square_difference += modifier
@@ -419,7 +420,7 @@ class Board:
         score = (self.square_difference +
                 self.wg_score)
 
-        return score
+        return self.square_difference
         
 
     

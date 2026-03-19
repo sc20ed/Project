@@ -66,6 +66,8 @@ def player_game():
         gameboard.advance_turn(p1_can_move)
         p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
+
+        print(gameboard.heuristics())
         
         if p1_can_move == 1 and p2_can_move == 1:
             active = 0
