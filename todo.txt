@@ -1,11 +1,11 @@
 tasks
 -----
-add github
-transfer to new laptop
-
-game tree implementation
-look machine learning implementation
-
+implement useful heuristics
+machine learning implementation
+implement alpha-beta pruning
+clean up and comment code
+optimise heuristics (dont calculate every turn)
+re-implement optimised frontier
 
 
 
@@ -13,7 +13,4 @@ look machine learning implementation
 
 optional
 --------
-replace deepcopy with unmaking moves (unmake list?) for minimax optimisation
 change player symbols (1 and 2) to 1 and -1 and adjust code (display code can be the same)
-implement alpha-beta pruning
-implement useful heuristics

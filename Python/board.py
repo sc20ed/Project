@@ -1,13 +1,16 @@
 class Board:
     def __init__(self, size=8):
         self.board = []
+        self.weight_grid = []
         self.size = size + 2
         self.frontier = set()
-        self.square_difference = 0
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
         self.unmake_list = []
+
+        self.square_difference = 0
+        self.wg_score = 0
 
         for i in range(self.size):
             row = []
@@ -15,9 +18,14 @@ class Board:
                 row.append(0)
             self.board.append(row)
 
-        self.setup()
-        #print(self.frontier)
+        for i in range(self.size):
+            row = []
+            for j in range(self.size):
+                row.append(0)
+            self.weight_grid.append(row)
 
+        self.setup()
+    
 
     def setup(self):
         midpoint = int(self.size/2)
@@ -25,6 +33,26 @@ class Board:
         self.board[midpoint-1][midpoint-1] = 1
         self.board[midpoint][midpoint] = 1
         self.board[midpoint][midpoint-1] = 2
+
+        # switch to file later
+        self.weight_grid[1][1] = 10
+        self.weight_grid[1][self.size-2] = 10
+        self.weight_grid[self.size-2][1] = 10
+        self.weight_grid[self.size-2][self.size-2] = 10
+
+        self.weight_grid[2][1] = -5
+        self.weight_grid[1][2] = -5
+        self.weight_grid[2][2] = -5
+        self.weight_grid[2][self.size-2] = -5
+        self.weight_grid[1][self.size-3] = -5
+        self.weight_grid[2][self.size-3] = -5
+        self.weight_grid[self.size-3][1] = -5
+        self.weight_grid[self.size-2][2] = -5
+        self.weight_grid[self.size-3][2] = -5
+        self.weight_grid[self.size-3][self.size-2] = -5
+        self.weight_grid[self.size-2][self.size-3] = -5
+        self.weight_grid[self.size-3][self.size-3] = -5
+
 
         """
         self.update_frontier((midpoint-1, midpoint))
@@ -336,6 +364,7 @@ class Board:
 
         self.board[move[0]][move[1]] = player
         self.square_difference += modifier
+        self.wg_score += self.weight_grid[move[0]][move[1]] * modifier
 
         for line in squares:
             for square in line:
@@ -344,6 +373,8 @@ class Board:
                 self.square_difference += (modifier*2)
 
         self.unmake_list.append(turn_change)
+
+
  
 
     def game_over(self):
@@ -377,9 +408,18 @@ class Board:
 
     # heuristic functions
     def heuristics(self):
-        # naive heuristics first
-        # total squares
-        return self.square_difference
+
+        # corners taken and corner adjacency
+        # simplified to weight grid
+
+        # number of possible moves
+        # leaving for now due to 
+
+        # overall heuristic function. static for now
+        score = (self.square_difference +
+                self.wg_score)
+
+        return score
         
 
     

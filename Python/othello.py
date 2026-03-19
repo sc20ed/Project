@@ -90,6 +90,7 @@ if __name__ == "__main__":
             cpu_game()
 
         elif option == 2:
+            
             player_game()
 
         elif option == 3:
