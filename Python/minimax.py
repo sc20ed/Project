@@ -54,12 +54,3 @@ def minimax(board, depth, maximising):
                 best_move = move           
 
     return best_move, score
-
-    
-    # recursive function, include alphabeta later
-    # if max depth, return the current heuristic
-    # get possible moves
-    # if there are no moves available, skip the turn
-    # for each move, make the move on a copy of the board and loop the function
-    # when max depth is reached, update the previous nodes
-    # if it is the caller's turn, save the max if it is the highest seen so far

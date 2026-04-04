@@ -1,13 +1,11 @@
 tasks
 -----
-implement useful heuristics
-machine learning implementation
 implement alpha-beta pruning
 clean up and comment code
+machine learning implementation
+implement additional heuristics
 optimise heuristics (dont calculate every turn)
 re-implement optimised frontier
-
-
 
 
 
