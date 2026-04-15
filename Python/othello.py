@@ -2,6 +2,7 @@ from random import randint
 from board import Board
 from minimax import minimax
 
+
 def turn(board, move_select):
     print(board.turn_count)
     player = board.whose_turn
@@ -11,15 +12,17 @@ def turn(board, move_select):
     if len(moves) == 0:
         return 1
     
-    if board.turn_count > 50 and move_select == 1:
-        move_select = 0
-    
     if move_select == 0:
         choice = randint(0, len(moves)-1)
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, _ = minimax(board, 4, False)
+        move, score = minimax(board, 4, True)
+        print(score)
+    elif move_select == 2:
+        choice = ("minimax")
+        move, score = minimax(board, 4, False)
+        print(score)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
         if choice > len(moves) or choice < 0:
@@ -44,7 +47,7 @@ def cpu_game():
     while active == 1:
         p1_can_move = turn(gameboard, 0)
         gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 1)
+        p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
         
         if p1_can_move == 1 and p2_can_move == 1:
@@ -52,7 +55,7 @@ def cpu_game():
 
     print("")
     print("GAME OVER")
-    print(gameboard.game_over())
+    gameboard.game_over()
 
 
 def player_game():
@@ -61,10 +64,14 @@ def player_game():
 
     active = 1
     while active == 1:
-        p1_can_move = turn(gameboard, 2)
+        p1_can_move = turn(gameboard, 3)
         gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 1)
+        p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
+
+        print("\nScore")
+        print(gameboard.heuristics())
+        print("")
         
         if p1_can_move == 1 and p2_can_move == 1:
             active = 0
@@ -89,6 +96,7 @@ if __name__ == "__main__":
             cpu_game()
 
         elif option == 2:
+            
             player_game()
 
         elif option == 3:

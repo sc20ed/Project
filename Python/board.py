@@ -1,11 +1,16 @@
 class Board:
     def __init__(self, size=8):
         self.board = []
+        self.weight_grid = []
         self.size = size + 2
         self.frontier = set()
-        self.square_difference = 0
+        self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
+        self.unmake_list = []
+
+        self.square_difference = 0
+        self.wg_score = 0
 
         for i in range(self.size):
             row = []
@@ -13,9 +18,14 @@ class Board:
                 row.append(0)
             self.board.append(row)
 
-        self.setup()
-        print(self.frontier)
+        for i in range(self.size):
+            row = []
+            for j in range(self.size):
+                row.append(0)
+            self.weight_grid.append(row)
 
+        self.setup()
+    
 
     def setup(self):
         midpoint = int(self.size/2)
@@ -24,11 +34,32 @@ class Board:
         self.board[midpoint][midpoint] = 1
         self.board[midpoint][midpoint-1] = 2
 
+        # switch to file later
+        self.weight_grid[1][1] = 50
+        self.weight_grid[1][self.size-2] = 50
+        self.weight_grid[self.size-2][1] = 50
+        self.weight_grid[self.size-2][self.size-2] = 50
+
+        self.weight_grid[2][1] = -25
+        self.weight_grid[1][2] = -25
+        self.weight_grid[2][2] = -25
+        self.weight_grid[2][self.size-2] = -25
+        self.weight_grid[1][self.size-3] = -25
+        self.weight_grid[2][self.size-3] = -25
+        self.weight_grid[self.size-3][1] = -25
+        self.weight_grid[self.size-2][2] = -25
+        self.weight_grid[self.size-3][2] = -25
+        self.weight_grid[self.size-3][self.size-2] = -25
+        self.weight_grid[self.size-2][self.size-3] = -25
+        self.weight_grid[self.size-3][self.size-3] = -25
+
+
+        """
         self.update_frontier((midpoint-1, midpoint))
         self.update_frontier((midpoint-1, midpoint-1))
         self.update_frontier((midpoint, midpoint))
         self.update_frontier((midpoint, midpoint-1))
-
+        """
 
 
     def reset(self):
@@ -47,10 +78,39 @@ class Board:
 
     def advance_turn(self, skipped):
         if not skipped:
-            self.turn_count += 1
+            self.move_count += 1
+        else:
+            self.unmake_list.append([self.square_difference, -1])
+
+        self.turn_count += 1
         self.whose_turn = (self.whose_turn*2) % 3
 
 
+    def retract_turn(self):
+        try:
+            prev_turn = self.unmake_list.pop()
+        except IndexError:
+            return
+        
+        self.turn_count -= 1
+
+        if prev_turn[1] == -1:
+            self.whose_turn = (self.whose_turn*2) % 3
+            return
+        
+        self.square_difference = prev_turn.pop(0)
+        self.wg_score = prev_turn.pop(0)
+        prev_move = prev_turn.pop(0)
+        self.board[prev_move[0]][prev_move[1]] = 0
+
+        for i, j in prev_turn:
+            self.board[i][j] = self.whose_turn
+
+        self.move_count -= 1
+        self.whose_turn = (self.whose_turn*2) % 3
+
+
+    """
     def update_frontier(self, move):
         x = move[0]
         y = move[1]
@@ -71,7 +131,7 @@ class Board:
             self.frontier.add((x-1, y+1))
         if self.board[x-1][y-1] == 0 and x > 1 and y > 1:
             self.frontier.add((x-1, y-1))
-
+    """
 
     def find_frontier(self, opponent):
         frontier = []
@@ -176,10 +236,11 @@ class Board:
 
     
     def find_moves(self, player, opponent):
-        #frontier = self.find_frontier(opponent)
+        # Simplified frontier for now
+        frontier = self.find_frontier(opponent)
         moves = []
         
-        for square in self.frontier:
+        for square in frontier:
             if (self.validate_move(player, opponent, square)):
                 moves.append(square)
 
@@ -291,8 +352,8 @@ class Board:
                     break
 
         self.flip(player, move, flip_squares)
-        self.frontier.remove(move)
-        self.update_frontier(move)
+        #self.frontier.remove(move)
+        #self.update_frontier(move)
 
 
     def flip(self, player, move, squares):
@@ -300,16 +361,25 @@ class Board:
         if player == 2:
             modifier = -1
 
+        turn_change = [self.square_difference, self.wg_score, move]
+
         self.board[move[0]][move[1]] = player
         self.square_difference += modifier
+        self.wg_score += self.weight_grid[move[0]][move[1]] * modifier
 
         for line in squares:
             for square in line:
+                turn_change.append(square)
                 self.board[square[0]][square[1]] = player
                 self.square_difference += (modifier*2)
+
+        self.unmake_list.append(turn_change)
+
+
  
 
     def game_over(self):
+        self.turn_count -= 2
         p1_total = 0
         p2_total = 0
 
@@ -323,6 +393,7 @@ class Board:
         print(p1_total)
         print(p2_total)
         print("Turn", self.turn_count)
+        print("Moves", self.move_count)
         print("Heuristic =", self.heuristics())
 
 
@@ -338,9 +409,18 @@ class Board:
 
     # heuristic functions
     def heuristics(self):
-        # naive heuristics first
-        # total squares
-        return self.square_difference
+
+        # corners taken and corner adjacency
+        # simplified to weight grid
+
+        # number of possible moves
+        # leaving for now due to 
+
+        # overall heuristic function. static for now
+        score = (self.square_difference +
+                self.wg_score)
+
+        return score
         
 
     
