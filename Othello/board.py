@@ -1,3 +1,4 @@
+# object to handle current board, game state and heuristics
 class Board:
     def __init__(self, size=8):
         self.board = []
@@ -27,6 +28,7 @@ class Board:
         self.setup()
     
 
+    # create initial game position and weighted squares heuristic
     def setup(self):
         midpoint = int(self.size/2)
         self.board[midpoint-1][midpoint] = 2
@@ -62,12 +64,14 @@ class Board:
         """
 
 
+    # reset board
     def reset(self):
         for j in range(1, self.size-1):
             for i in range(1, self.size-1):
                 self.board[i][j] = 0
 
 
+    # print board to terminal
     def display(self):
         for j in range(1, self.size-1):
             for i in range(1, self.size-1):
@@ -76,6 +80,7 @@ class Board:
         print("")
 
 
+    # update turn count and current player
     def advance_turn(self, skipped):
         if not skipped:
             self.move_count += 1
@@ -86,6 +91,7 @@ class Board:
         self.whose_turn = (self.whose_turn*2) % 3
 
 
+    # revert to previous turn and heuristics 
     def retract_turn(self):
         try:
             prev_turn = self.unmake_list.pop()
@@ -111,6 +117,7 @@ class Board:
 
 
     """
+    # update immediate frontier squares for incremental use
     def update_frontier(self, move):
         x = move[0]
         y = move[1]
@@ -133,6 +140,7 @@ class Board:
             self.frontier.add((x-1, y-1))
     """
 
+    # find frontier by checking the entire board
     def find_frontier(self, opponent):
         frontier = []
 
@@ -152,12 +160,13 @@ class Board:
         return frontier
     
     
+    # check if frontier squares are valid moves
     def validate_move(self, player, opponent, square):
         x = square[0]
         y = square[1]
 
         # for each direction if there is an opponent continue checking adjacent squares
-        # if player is reached before empty or edge, add to move list and dont check other directions
+        # if a player square is reached before an empty or edge then move is valid
 
         # horizontal
         if self.board[x+1][y] == opponent:
@@ -235,8 +244,9 @@ class Board:
                     break
 
     
+    # check what legal moves are available
     def find_moves(self, player, opponent):
-        # Simplified frontier for now
+        # simplified frontier for now
         frontier = self.find_frontier(opponent)
         moves = []
         
@@ -247,10 +257,14 @@ class Board:
         return moves
 
 
+    # find and enact consequences of making chosen move
     def make_move(self, player, opponent, move):
         x = move[0]
         y = move[1]
         flip_squares = []
+
+        # for each direction if there is an opponent continue checking adjacent squares
+        # if a player square is reached before an empty or edge then add all squares checked to flip list
 
         # horizontal
         if self.board[x+1][y] == opponent:
@@ -356,6 +370,7 @@ class Board:
         #self.update_frontier(move)
 
 
+    # flip squares captured by chosen move, update heuristics and record changes for unmake list
     def flip(self, player, move, squares):
         modifier = 1
         if player == 2:
@@ -376,8 +391,7 @@ class Board:
         self.unmake_list.append(turn_change)
 
 
- 
-
+    # end game and determine winner
     def game_over(self):
         self.turn_count -= 2
         p1_total = 0
@@ -407,16 +421,8 @@ class Board:
             print("Game over! The game is a draw, both players scored " + str(p1_total) + "!")
         
 
-    # heuristic functions
+    # evaluation function
     def heuristics(self):
-
-        # corners taken and corner adjacency
-        # simplified to weight grid
-
-        # number of possible moves
-        # leaving for now due to 
-
-        # overall heuristic function. static for now
         score = (self.square_difference +
                 self.wg_score)
 

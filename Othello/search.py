@@ -1,5 +1,4 @@
 # functions for minimax search
-from board import Board
 
 
 # basic minimax
@@ -7,6 +6,7 @@ def minimax(board, depth, maximising):
     if depth == 0 or board.move_count >= 60:
         return None, board.heuristics()
     
+    # MAX PLAYER
     if maximising:
         score = -999999
         moves = board.find_moves(1, 2)
@@ -30,6 +30,7 @@ def minimax(board, depth, maximising):
                 score = temp_score
                 best_move = move
 
+    # MIN PLAYER
     else:
         score = 999999
         moves = board.find_moves(2, 1)
@@ -61,6 +62,7 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
     if depth == 0 or board.move_count >= 60:
         return None, board.heuristics()
     
+    # MAX PLAYER
     if maximising:
         score = -999999
         moves = board.find_moves(1, 2)
@@ -86,11 +88,13 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
                 score = temp_score
                 best_move = move
 
+            # stop evaluating subtree if a move guarantees it won't be chosen by MIN
             if score >= beta:
                 break
 
             alpha = max(alpha, score)
 
+    # MIN PLAYER
     else:
         score = 999999
         moves = board.find_moves(2, 1)
@@ -116,10 +120,10 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
                 score = temp_score
                 best_move = move
 
+            # stop evaluating subtree if a move guarantees it won't be chosen by MAX
             if score < alpha:
                 break
 
             beta = min(beta, score)
-
 
     return best_move, score
