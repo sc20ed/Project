@@ -9,6 +9,7 @@ class Board:
         self.turn_count = 0
         self.whose_turn = 1
         self.unmake_list = []
+        self.frontier_unmake_list = []
 
         self.square_difference = 0
         self.wg_score = 0
@@ -28,13 +29,18 @@ class Board:
         self.setup()
     
 
-    # create initial game position and weighted squares heuristic
+    # create initial game position, initial frontier and weighted squares heuristic
     def setup(self):
         midpoint = int(self.size/2)
         self.board[midpoint-1][midpoint] = 2
         self.board[midpoint-1][midpoint-1] = 1
         self.board[midpoint][midpoint] = 1
         self.board[midpoint][midpoint-1] = 2
+
+        self.update_frontier((midpoint-1, midpoint))
+        self.update_frontier((midpoint-1, midpoint-1))
+        self.update_frontier((midpoint, midpoint))
+        self.update_frontier((midpoint, midpoint-1))
 
         # switch to file later
         self.weight_grid[1][1] = 50
@@ -56,14 +62,6 @@ class Board:
         self.weight_grid[self.size-3][self.size-3] = -25
 
 
-        """
-        self.update_frontier((midpoint-1, midpoint))
-        self.update_frontier((midpoint-1, midpoint-1))
-        self.update_frontier((midpoint, midpoint))
-        self.update_frontier((midpoint, midpoint-1))
-        """
-
-
     # reset board
     def reset(self):
         for j in range(1, self.size-1):
@@ -80,18 +78,19 @@ class Board:
         print("")
 
 
-    # update turn count and current player
+    # store details about this turn and continue to next turn
     def advance_turn(self, skipped):
         if not skipped:
             self.move_count += 1
         else:
             self.unmake_list.append([self.square_difference, -1])
+            self.frontier_unmake_list.append(set(self.frontier))
 
         self.turn_count += 1
         self.whose_turn = (self.whose_turn*2) % 3
 
 
-    # revert to previous turn and heuristics 
+    # revert to previous turn and details
     def retract_turn(self):
         try:
             prev_turn = self.unmake_list.pop()
@@ -101,6 +100,7 @@ class Board:
         self.turn_count -= 1
 
         if prev_turn[1] == -1:
+            self.frontier = set(self.frontier_unmake_list.pop())
             self.whose_turn = (self.whose_turn*2) % 3
             return
         
@@ -112,11 +112,12 @@ class Board:
         for i, j in prev_turn:
             self.board[i][j] = self.whose_turn
 
+        self.frontier = set(self.frontier_unmake_list.pop())
         self.move_count -= 1
         self.whose_turn = (self.whose_turn*2) % 3
 
 
-    """
+    
     # update immediate frontier squares for incremental use
     def update_frontier(self, move):
         x = move[0]
@@ -138,7 +139,7 @@ class Board:
             self.frontier.add((x-1, y+1))
         if self.board[x-1][y-1] == 0 and x > 1 and y > 1:
             self.frontier.add((x-1, y-1))
-    """
+
 
     # find frontier by checking the entire board
     def find_frontier(self, opponent):
@@ -246,11 +247,12 @@ class Board:
     
     # check what legal moves are available
     def find_moves(self, player, opponent):
-        # simplified frontier for now
-        frontier = self.find_frontier(opponent)
         moves = []
+
+        # simplified frontier checking
+        #frontier = self.find_frontier(opponent)
         
-        for square in frontier:
+        for square in self.frontier:
             if (self.validate_move(player, opponent, square)):
                 moves.append(square)
 
@@ -366,8 +368,6 @@ class Board:
                     break
 
         self.flip(player, move, flip_squares)
-        #self.frontier.remove(move)
-        #self.update_frontier(move)
 
 
     # flip squares captured by chosen move, update heuristics and record changes for unmake list
@@ -389,6 +389,10 @@ class Board:
                 self.square_difference += (modifier*2)
 
         self.unmake_list.append(turn_change)
+        self.frontier_unmake_list.append(set(self.frontier))
+        self.update_frontier(move)
+        self.frontier.remove(move)
+        
 
 
     # end game and determine winner

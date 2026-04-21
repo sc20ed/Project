@@ -18,12 +18,10 @@ def turn(board, move_select):
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, score = minimax(board, 4, True)
-        print(score)
+        move, _ = minimax(board, 4, True)
     elif move_select == 2:
         choice = ("alpha beta")
-        move, score = alpha_beta(board, 5, False)
-        print(score)
+        move, _ = alpha_beta(board, 5, False)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
         if choice > len(moves) or choice < 0:
@@ -68,7 +66,7 @@ def player_game():
     while active == 1:
         p1_can_move = turn(gameboard, 3)
         gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 2)
+        p2_can_move = turn(gameboard, 0)
         gameboard.advance_turn(p2_can_move)
 
         print("\nScore")
