@@ -17,7 +17,7 @@ def turn(board, move_select):
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, score = alpha_beta(board, 4, True)
+        move, score = minimax(board, 4, True)
         print(score)
     elif move_select == 2:
         choice = ("alpha beta")
@@ -44,7 +44,7 @@ def cpu_game():
 
     active = 1
     while active == 1:
-        p1_can_move = turn(gameboard, 0)
+        p1_can_move = turn(gameboard, 1)
         gameboard.advance_turn(p1_can_move)
         p2_can_move = turn(gameboard, 2)
         gameboard.advance_turn(p2_can_move)
