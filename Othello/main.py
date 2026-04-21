@@ -1,6 +1,6 @@
 from random import randint
 from board import Board
-from minimax import minimax
+from search import minimax
 
 
 def turn(board, move_select):
