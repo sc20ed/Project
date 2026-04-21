@@ -1,6 +1,6 @@
 from random import randint
 from board import Board
-from search import minimax
+from search import minimax, alpha_beta
 
 
 def turn(board, move_select):
@@ -17,11 +17,11 @@ def turn(board, move_select):
         move = moves[choice]
     elif move_select == 1:
         choice = ("minimax")
-        move, score = minimax(board, 4, True)
+        move, score = alpha_beta(board, 4, True)
         print(score)
     elif move_select == 2:
-        choice = ("minimax")
-        move, score = minimax(board, 4, False)
+        choice = ("alpha beta")
+        move, score = alpha_beta(board, 5, False)
         print(score)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
@@ -34,7 +34,6 @@ def turn(board, move_select):
     print("")
     board.make_move(player, opponent, (move))
     board.display()
-    print("")
 
     return 0
 
