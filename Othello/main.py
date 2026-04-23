@@ -9,10 +9,10 @@ if __name__ == "__main__":
         option = int(input("Select an option: "))
 
         if option == 1:
-            cpu_game()
+            run_game(8, 0, 2, 0)
 
         elif option == 2:
-            run_game(8, 2, 2, 0)
+            run_game(8, 3, 2, 0)
 
         elif option == 3:
             pass

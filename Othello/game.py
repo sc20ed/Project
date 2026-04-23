@@ -10,9 +10,12 @@ def tmp_turn(board, p_type):
     maximising = bool(player+1)
     
     # select move with current player method
+    move = None
+
     if p_type == 0:
         moves = board.find_moves(player, opponent)
-        move = moves[randint(0, len(moves)-1)]
+        if len(moves) > 0:
+            move = moves[randint(0, len(moves)-1)]
 
     elif p_type == 1:
         move, score = minimax(board, 4, maximising)
@@ -22,12 +25,17 @@ def tmp_turn(board, p_type):
 
     else:
         try:
-            print(moves)
-            choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
-        except ValueError:
+            moves = board.find_moves(player, opponent)
+            if len(moves) > 0:
+                print(moves)
+                choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
+                move = moves[choice]
+            else:
+                print("No moves, turn passed.")
+
+        except (ValueError, IndexError):
             print("Invalid selection. First move selected by default.")
-            choice = 0
-        move = moves[choice]
+            move = moves[0]
     
     # make move or pass if none are available
     if move == (-1, -1) or move == None:
