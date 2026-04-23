@@ -20,13 +20,3 @@ if __name__ == "__main__":
 
         else:
             print("\nInvalid option.")
-
-
-    # test code for full board with padding    
-    """
-    for j in range(gameboard.size):
-        for i in range(gameboard.size):
-            print(str(gameboard.board[i][j]) + " ", end='')
-        print("")
-    print("")
-    """
