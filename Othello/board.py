@@ -360,9 +360,8 @@ class Board:
         self.unmake_list.append(turn_change)
 
 
-    # end game and determine winner
+    # end game and determine winner and score
     def game_over(self):
-        self.turn_count -= 2
         p1_total = 0
         p2_total = 0
 
@@ -373,21 +372,14 @@ class Board:
                 elif self.board[i][j] == -1:
                     p2_total += 1
 
-        print(p1_total)
-        print(p2_total)
-        print("Turn", self.turn_count)
-        print("Moves", self.move_count)
-        print("Heuristic =", self.heuristics())
-
-
         if p1_total > p2_total:
-            print("Game over! The winner is player 1, with a total score of " + str(p1_total) + "!")
-
+            winner = 1
         elif p2_total > p1_total:
-            print("Game over! The winner is player 2, with a total score of " + str(p2_total) + "!")
-
+            winner = -1
         else:
-            print("Game over! The game is a draw, both players scored " + str(p1_total) + "!")
+            winner = 0
+
+        return winner, (p1_total, p2_total)
         
 
     # evaluation function

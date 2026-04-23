@@ -86,6 +86,4 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
         if p1_pass == 1 and p2_pass == 1:
             active = 0
 
-    print("DONE")
-
-    #return board.game_over()
+    return board.game_over()

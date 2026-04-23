@@ -9,10 +9,14 @@ if __name__ == "__main__":
         option = int(input("Select an option: "))
 
         if option == 1:
-            run_game(8, 0, 2, 0)
+            winner, score = run_game(8, 0, 2, 0)
+            print(f"WINNER: Player {(winner+3)%3}")
+            print(f"SCORE: {score[0]} - {score[1]}")
 
         elif option == 2:
-            run_game(8, 3, 2, 0)
+            winner, score = run_game(8, 3, 2, 0)
+            print(f"WINNER: Player {(winner+3)%3}")
+            print(f"SCORE: {score[0]} - {score[1]}")
 
         elif option == 3:
             pass
