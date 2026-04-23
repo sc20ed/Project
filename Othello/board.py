@@ -31,10 +31,11 @@ class Board:
     # create initial game position and weighted squares heuristic
     def setup(self):
         midpoint = int(self.size/2)
-        self.board[midpoint-1][midpoint] = 2
-        self.board[midpoint-1][midpoint-1] = 1
         self.board[midpoint][midpoint] = 1
-        self.board[midpoint][midpoint-1] = 2
+        self.board[midpoint][midpoint-1] = -1
+        self.board[midpoint-1][midpoint] = -1
+        self.board[midpoint-1][midpoint-1] = 1
+        
 
         # switch to file later
         self.weight_grid[1][1] = 50
@@ -67,10 +68,15 @@ class Board:
     def display(self):
         for j in range(1, self.size-1):
             for i in range(1, self.size-1):
-                print(str(self.board[i][j]) + " ", end='')
+                if self.board[i][j] == 0:
+                    print("." + " ", end='')
+                elif self.board[i][j] == 1:
+                    print("X" + " ", end='')
+                elif self.board[i][j] == -1:
+                    print("O" + " ", end='')
+                else:
+                    print(str(self.board[i][j]) + " ", end='')
             print("")
-        print("")
-
 
     # update turn count and current player
     def advance_turn(self, skipped):
@@ -80,7 +86,7 @@ class Board:
             self.unmake_list.append([self.square_difference, -1])
 
         self.turn_count += 1
-        self.whose_turn = (self.whose_turn*2) % 3
+        self.whose_turn *= -1
 
 
     # revert to previous turn and heuristics 
@@ -88,12 +94,13 @@ class Board:
         try:
             prev_turn = self.unmake_list.pop()
         except IndexError:
+            print("ERROR\n\n\n\n\n\nERROR")
             return
         
         self.turn_count -= 1
 
         if prev_turn[1] == -1:
-            self.whose_turn = (self.whose_turn*2) % 3
+            self.whose_turn *= -1
             return
         
         self.square_difference = prev_turn.pop(0)
@@ -105,7 +112,7 @@ class Board:
             self.board[i][j] = self.whose_turn
 
         self.move_count -= 1
-        self.whose_turn = (self.whose_turn*2) % 3
+        self.whose_turn *= -1
 
 
     # find frontier by checking the entire board
@@ -214,7 +221,7 @@ class Board:
     
     # check what legal moves are available
     def find_moves(self, player, opponent):
-        # simplified frontier for now
+
         frontier = self.find_frontier(opponent)
         moves = []
         
@@ -334,34 +341,27 @@ class Board:
                     break
 
         self.flip(player, move, flip_squares)
-        #self.frontier.remove(move)
-        #self.update_frontier(move)
 
 
     # flip squares captured by chosen move, update heuristics and record changes for unmake list
     def flip(self, player, move, squares):
-        modifier = 1
-        if player == 2:
-            modifier = -1
-
         turn_change = [self.square_difference, self.wg_score, move]
 
         self.board[move[0]][move[1]] = player
-        self.square_difference += modifier
-        self.wg_score += self.weight_grid[move[0]][move[1]] * modifier
+        self.square_difference += player
+        self.wg_score += self.weight_grid[move[0]][move[1]] * player
 
         for line in squares:
             for square in line:
                 turn_change.append(square)
                 self.board[square[0]][square[1]] = player
-                self.square_difference += (modifier*2)
+                self.square_difference += (player*2)
 
         self.unmake_list.append(turn_change)
 
 
-    # end game and determine winner
+    # end game and determine winner and score
     def game_over(self):
-        self.turn_count -= 2
         p1_total = 0
         p2_total = 0
 
@@ -369,24 +369,17 @@ class Board:
             for j in range(1, self.size-1):
                 if self.board[i][j] == 1:
                     p1_total += 1
-                elif self.board[i][j] == 2:
+                elif self.board[i][j] == -1:
                     p2_total += 1
 
-        print(p1_total)
-        print(p2_total)
-        print("Turn", self.turn_count)
-        print("Moves", self.move_count)
-        print("Heuristic =", self.heuristics())
-
-
         if p1_total > p2_total:
-            print("Game over! The winner is player 1, with a total score of " + str(p1_total) + "!")
-
+            winner = 1
         elif p2_total > p1_total:
-            print("Game over! The winner is player 2, with a total score of " + str(p2_total) + "!")
-
+            winner = -1
         else:
-            print("Game over! The game is a draw, both players scored " + str(p1_total) + "!")
+            winner = 0
+
+        return winner, (p1_total, p2_total)
         
 
     # evaluation function

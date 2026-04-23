@@ -3,81 +3,87 @@ from board import Board
 from search import minimax, alpha_beta
 
 
-# select move (or skip if none) and complete game turn
-def turn(board, move_select):
-    print(board.turn_count)
+# game turn 
+def turn(board, p_type):
     player = board.whose_turn
-    opponent = (board.whose_turn*2) % 3
-    moves = board.find_moves(player, opponent)
+    opponent = player * -1
+    maximising = bool(player+1)
+    move = None
 
-    if len(moves) == 0:
-        return 1
-    
-    if move_select == 0:
-        choice = randint(0, len(moves)-1)
-        move = moves[choice]
-    elif move_select == 1:
-        choice = ("minimax")
-        move, score = minimax(board, 4, True)
-        print(score)
-    elif move_select == 2:
-        choice = ("alpha beta")
-        move, score = alpha_beta(board, 5, False)
-        print(score)
-    else:
-        choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
-        if choice > len(moves) or choice < 0:
+
+    # select move with current player method
+    if p_type == 0:
+        moves = board.find_moves(player, opponent)
+        if len(moves) > 0:
+            move = moves[randint(0, len(moves)-1)]
+
+    elif p_type == 1:
+        move, score = minimax(board, 4, maximising)
+
+    elif p_type == 2:
+        move, score = alpha_beta(board, 5, maximising)
+
+    elif p_type == 3:
+        # player move selection for testing
+        try:
+            moves = board.find_moves(player, opponent)
+
+            if len(moves) > 0:
+                print(moves)
+                choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
+                move = moves[choice]
+
+            else:
+                print("No moves, turn passed.")
+
+        except (ValueError, IndexError):
             print("Invalid selection. First move selected by default.")
-            choice = 0
-        move = moves[choice]
+            move = moves[0]
     
-    print(choice, move)
-    print("")
-    board.make_move(player, opponent, (move))
-    board.display()
+    # make move or pass if none are available
+    if move == (-1, -1) or move == None:
+        board.advance_turn(1)
+        return 1
+    else:
+        board.make_move(player, opponent, (move))
+        board.advance_turn(0)
+        return 0
+    
 
-    return 0
+# return whether the board is full
+def board_is_full(move_count, board_size):
+    return move_count + 4 >= (board_size * board_size)
 
 
-# run game with random cpu vs ab-search
-def cpu_game():
-    gameboard = Board(8)
-    gameboard.display()
+# run game based on arguments
+# p_type arguments represent the method used for move selection
+def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
 
+    # initialise board a with set number of random moves
+    board = Board(size)
+    for i in range(n_random_moves):
+        turn(board, 0)
+
+    # adjust turn order
+    if n_random_moves % 2 == 1:
+        p1_type, p2_type = p2_type, p1_type
+
+    # main game loop
     active = 1
     while active == 1:
-        p1_can_move = turn(gameboard, 0)
-        gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 2)
-        gameboard.advance_turn(p2_can_move)
-        
-        if p1_can_move == 1 and p2_can_move == 1:
-            active = 0
-
-    print("")
-    print("GAME OVER")
-    gameboard.game_over()
-
-
-# run game with player vs ab-search
-def player_game():
-    gameboard = Board(8)
-    gameboard.display()
-
-    active = 1
-    while active == 1:
-        p1_can_move = turn(gameboard, 3)
-        gameboard.advance_turn(p1_can_move)
-        p2_can_move = turn(gameboard, 2)
-        gameboard.advance_turn(p2_can_move)
-
-        print("\nScore")
-        print(gameboard.heuristics())
+        p1_pass = turn(board, p1_type)
+        board.display()
         print("")
+        if board_is_full(board.move_count, size):
+            break
+
+        p2_pass = turn(board, p2_type)
+        board.display()
+        print("")
+        if board_is_full(board.move_count, size):
+            break
         
-        if p1_can_move == 1 and p2_can_move == 1:
+        if p1_pass == 1 and p2_pass == 1:
             active = 0
 
-    print("")
-    print("GAME OVER")
-    gameboard.game_over()
+    return board.game_over()
