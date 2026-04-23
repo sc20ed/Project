@@ -39,8 +39,9 @@ def tmp_turn(board, p_type):
 # select move (or skip if none) and complete game turn
 def turn(board, move_select):
     print(board.turn_count)
+    print(board.whose_turn)
     player = board.whose_turn
-    opponent = (board.whose_turn*2) % 3
+    opponent = player * -1
     moves = board.find_moves(player, opponent)
 
     if len(moves) == 0:
@@ -52,11 +53,9 @@ def turn(board, move_select):
     elif move_select == 1:
         choice = ("minimax")
         move, score = minimax(board, 4, True)
-        print(score)
     elif move_select == 2:
         choice = ("alpha beta")
         move, score = alpha_beta(board, 5, False)
-        print(score)
     else:
         choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
         if choice > len(moves) or choice < 0:

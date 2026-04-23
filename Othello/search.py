@@ -6,7 +6,7 @@ def minimax(board, depth, maximising):
     # MAX PLAYER
     if maximising:
         score = -999999
-        moves = board.find_moves(1, 2)
+        moves = board.find_moves(1, -1)
 
         if len(moves) == 0:
             board.advance_turn(1)
@@ -18,7 +18,7 @@ def minimax(board, depth, maximising):
                 best_move = (-1, -1)
 
         for move in moves:
-            board.make_move(1, 2, move)
+            board.make_move(1, -1, move)
             board.advance_turn(0)
             _, temp_score = minimax(board, depth-1, False)
             board.retract_turn()
@@ -30,7 +30,7 @@ def minimax(board, depth, maximising):
     # MIN PLAYER
     else:
         score = 999999
-        moves = board.find_moves(2, 1)
+        moves = board.find_moves(-1, 1)
 
         if len(moves) == 0:
             board.advance_turn(1)
@@ -41,8 +41,8 @@ def minimax(board, depth, maximising):
                 score = temp_score
                 best_move = (-1, -1)
 
-        for move in board.find_moves(2, 1):
-            board.make_move(2, 1, move)
+        for move in moves:
+            board.make_move(-1, 1, move)
             board.advance_turn(0)
             _, temp_score = minimax(board, depth-1, True)
             board.retract_turn()
@@ -62,7 +62,7 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
     # MAX PLAYER
     if maximising:
         score = -999999
-        moves = board.find_moves(1, 2)
+        moves = board.find_moves(1, -1)
 
         if len(moves) == 0:
             board.advance_turn(1)
@@ -76,7 +76,7 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
             alpha = max(alpha, score)
 
         for move in moves:
-            board.make_move(1, 2, move)
+            board.make_move(1, -1, move)
             board.advance_turn(0)
             _, temp_score = alpha_beta(board, depth-1, False, alpha, beta)
             board.retract_turn()
@@ -94,7 +94,7 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
     # MIN PLAYER
     else:
         score = 999999
-        moves = board.find_moves(2, 1)
+        moves = board.find_moves(-1, 1)
 
         if len(moves) == 0:
             board.advance_turn(1)
@@ -107,8 +107,8 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
 
             beta = min(beta, score)
 
-        for move in board.find_moves(2, 1):
-            board.make_move(2, 1, move)
+        for move in moves:
+            board.make_move(-1, 1, move)
             board.advance_turn(0)
             _, temp_score = alpha_beta(board, depth-1, True, alpha, beta)
             board.retract_turn()
