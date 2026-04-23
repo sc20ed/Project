@@ -56,14 +56,6 @@ class Board:
         self.weight_grid[self.size-3][self.size-3] = -25
 
 
-        """
-        self.update_frontier((midpoint-1, midpoint))
-        self.update_frontier((midpoint-1, midpoint-1))
-        self.update_frontier((midpoint, midpoint))
-        self.update_frontier((midpoint, midpoint-1))
-        """
-
-
     # reset board
     def reset(self):
         for j in range(1, self.size-1):
@@ -115,30 +107,6 @@ class Board:
         self.move_count -= 1
         self.whose_turn = (self.whose_turn*2) % 3
 
-
-    """
-    # update immediate frontier squares for incremental use
-    def update_frontier(self, move):
-        x = move[0]
-        y = move[1]
-
-        if self.board[x][y+1] == 0 and y < 8:
-            self.frontier.add((x, y+1))
-        if self.board[x][y-1] == 0 and y > 1:
-            self.frontier.add((x, y-1))
-        if self.board[x+1][y] == 0 and x < 8:
-            self.frontier.add((x+1, y))
-        if self.board[x-1][y] == 0 and x > 1:
-            self.frontier.add((x-1, y))
-        if self.board[x+1][y+1] == 0 and x < 8 and y < 8:
-            self.frontier.add((x+1, y+1))
-        if self.board[x+1][y-1] == 0 and x < 8 and y > 1:
-            self.frontier.add((x+1, y-1))
-        if self.board[x-1][y+1] == 0 and x > 1 and y < 8:
-            self.frontier.add((x-1, y+1))
-        if self.board[x-1][y-1] == 0 and x > 1 and y > 1:
-            self.frontier.add((x-1, y-1))
-    """
 
     # find frontier by checking the entire board
     def find_frontier(self, opponent):

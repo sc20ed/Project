@@ -1,6 +1,3 @@
-# functions for minimax search
-
-
 # basic minimax
 def minimax(board, depth, maximising):
     if depth == 0 or board.move_count >= 60:
