@@ -221,7 +221,7 @@ class Board:
     
     # check what legal moves are available
     def find_moves(self, player, opponent):
-        # simplified frontier for now
+
         frontier = self.find_frontier(opponent)
         moves = []
         
