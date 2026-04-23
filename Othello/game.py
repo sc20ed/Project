@@ -48,6 +48,11 @@ def turn(board, p_type):
         board.make_move(player, opponent, (move))
         board.advance_turn(0)
         return 0
+    
+
+# return whether the board is full
+def board_is_full(move_count, board_size):
+    return move_count + 4 >= (board_size * board_size)
 
 
 # run game based on arguments
@@ -69,14 +74,14 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
         p1_pass = turn(board, p1_type)
         board.display()
         print("")
-        #if board.is_full():
-        #    break
+        if board_is_full(board.move_count, size):
+            break
 
         p2_pass = turn(board, p2_type)
         board.display()
         print("")
-        #if board.is_full():
-        #    break
+        if board_is_full(board.move_count, size):
+            break
         
         if p1_pass == 1 and p2_pass == 1:
             active = 0

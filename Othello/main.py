@@ -1,4 +1,4 @@
-from game import cpu_game, player_game, run_game
+from game import run_game
 # CLI for initiating cpu or player vs cpu games 
 
 if __name__ == "__main__":
