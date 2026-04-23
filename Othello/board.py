@@ -341,8 +341,6 @@ class Board:
                     break
 
         self.flip(player, move, flip_squares)
-        #self.frontier.remove(move)
-        #self.update_frontier(move)
 
 
     # flip squares captured by chosen move, update heuristics and record changes for unmake list
