@@ -1,6 +1,11 @@
+import logging
+
+log = logging.getLogger("search.py")
+
+
 # basic minimax
 def minimax(board, depth, maximising):
-    if depth == 0 or board.move_count >= 60:
+    if depth == 0 or board.move_count >= board.max_moves:
         return None, board.heuristics()
     
     # MAX PLAYER
