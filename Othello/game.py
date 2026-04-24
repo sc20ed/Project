@@ -1,7 +1,9 @@
-from random import randint
 from board import Board
 from search import minimax, alpha_beta
+from random import randint
+import logging
 
+log = logging.getLogger("game.py")
 
 # game turn 
 def turn(board, p_type):
@@ -15,14 +17,17 @@ def turn(board, p_type):
         moves = board.find_moves(player, opponent)
         if len(moves) > 0:
             move = moves[randint(0, len(moves)-1)]
+            log.debug("Selected move %s", move)
 
     elif p_type == 1:
         maximising = bool(player+1)
         move, score = minimax(board, 4, maximising)
+        log.debug("Selected move %s with score %d", move, score)
 
     elif p_type == 2:
         maximising = bool(player+1)
         move, score = alpha_beta(board, 5, maximising)
+        log.debug("Selected move %s with score %d", move, score)
 
     elif p_type == 3:
         # player move selection for testing
@@ -33,6 +38,7 @@ def turn(board, p_type):
                 print(moves)
                 choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
                 move = moves[choice]
+                log.debug("Selected move %s", move)
 
             else:
                 print("No moves, turn passed.")
@@ -40,12 +46,15 @@ def turn(board, p_type):
         except (ValueError, IndexError):
             print("Invalid selection. First move selected by default.")
             move = moves[0]
+            log.debug("Selected move %s", move)
     
     # make move or pass if none are available
     if move == (-1, -1) or move == None:
+        log.debug("No move available, passing turn")
         board.advance_turn(1)
         return 1
     else:
+        log.debug("Making move %s", move)
         board.make_move(player, opponent, (move))
         board.advance_turn(0)
         return 0
@@ -60,29 +69,36 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
     if n_random_moves > 0:
         for i in range(n_random_moves):
             turn(board, 0)
+        log.debug("Set up board with %s random moves", n_random_moves)
         board.display()
         print("")
 
-    # adjust turn order
+    # adjust turn order - may be unnecessary
     if n_random_moves % 2 == 1:
         p1_type, p2_type = p2_type, p1_type
+        log.debug("Swapped turn order to offset odd number of random moves")
 
     # main game loop
     active = 1
     while active == 1:
+        log.debug("Player 1 turn")
         p1_pass = turn(board, p1_type)
         board.display()
         print("")
         if board.move_count >= board.max_moves:
+            log.debug("Board full, game complete")
             break
 
+        log.debug("Player 2 turn")
         p2_pass = turn(board, p2_type)
         board.display()
         print("")
         if board.move_count >= board.max_moves:
+            log.debug("Board full, game complete")
             break
         
         if p1_pass == 1 and p2_pass == 1:
+            log.debug("Neither player can  move, game complete")
             active = 0
 
     return board.game_over()

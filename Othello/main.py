@@ -1,10 +1,12 @@
 from game import run_game
 import logging
 
-log = logging.getLogger(__name__)
+# create log and config
+log = logging.getLogger("main.py")
 logging.basicConfig(filename="log.txt", filemode="w",
                     format='%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', encoding="utf-8", level=logging.DEBUG)
+
 
 # prompt user to change the logging level
 def set_logging_level():
@@ -40,24 +42,36 @@ def main():
         print("\n1: CPU vs CPU game\n2: Player vs CPU game\n3: Set logging level\n4: exit")
         option = int(input("Select an option: "))
 
+        # cpu vs cpu
         if option == 1:
             log.info("Starting CPU vs CPU game")
             winner, score = run_game(8, 0, 2, 0)
-            print(f"WINNER: Player {(winner+3)%3}")
+            if winner == 0:
+                print(f"DRAW")
+                log.info("Draw with score %s", score)
+            else:
+                print(f"WINNER: Player {(winner+3)%3}")
+                log.info("Player %s win with score %s", winner, score)
             print(f"SCORE: {score[0]} - {score[1]}")
-            log.info("Player %s win with score %s", winner, score)
 
+        # player vs cpu
         elif option == 2:
             log.info("Starting Player vs CPU game")
             winner, score = run_game(8, 3, 2, 0)
-            print(f"WINNER: Player {(winner+3)%3}")
+            if winner == 0:
+                print(f"DRAW")
+                log.info("Draw with score %s", score)
+            else:
+                print(f"WINNER: Player {(winner+3)%3}")
+                log.info("Player %s win with score %s", winner, score)
             print(f"SCORE: {score[0]} - {score[1]}")
-            log.info("Player %s win with score %s", winner, score)
 
+        # change logging level
         elif option == 3:
             set_logging_level()
             log.info("Logging level set to %s", logging.getLevelName(log.getEffectiveLevel()))
 
+        # exit
         elif option == 4:
             log.info("User exit")
 
