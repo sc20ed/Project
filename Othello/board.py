@@ -2,6 +2,7 @@ import logging
 
 log = logging.getLogger("board.py")
 
+
 # object to handle current board, game state and heuristics
 class Board:
     def __init__(self, size=8):
@@ -36,12 +37,11 @@ class Board:
     # create initial game position and weighted squares heuristic
     def setup(self):
         midpoint = int(self.size/2)
-        self.board[midpoint][midpoint] = 1
-        self.board[midpoint][midpoint-1] = -1
-        self.board[midpoint-1][midpoint] = -1
         self.board[midpoint-1][midpoint-1] = 1
+        self.board[midpoint-1][midpoint] = -1
+        self.board[midpoint][midpoint-1] = -1
+        self.board[midpoint][midpoint] = 1
         
-
         # switch to file later
         self.weight_grid[1][1] = 50
         self.weight_grid[1][self.size-2] = 50
@@ -85,8 +85,8 @@ class Board:
             print("")
 
     # update turn count and current player
-    def advance_turn(self, skipped):
-        if not skipped:
+    def advance_turn(self, passed):
+        if not passed:
             self.move_count += 1
         else:
             self.unmake_list.append([self.square_difference, -1])

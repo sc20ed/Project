@@ -5,6 +5,7 @@ import logging
 
 log = logging.getLogger("game.py")
 
+
 # game turn 
 def turn(board, p_type):
     player = board.whose_turn
