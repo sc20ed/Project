@@ -1,3 +1,7 @@
+import logging
+
+log = logging.getLogger("board.py")
+
 # object to handle current board, game state and heuristics
 class Board:
     def __init__(self, size=8):
@@ -77,6 +81,7 @@ class Board:
                     print("O" + " ", end='')
                 else:
                     print(str(self.board[i][j]) + " ", end='')
+                    log.error("Invalid board character %s at [%d][%d]", str(self.board[i][j]), i, j)
             print("")
 
     # update turn count and current player
@@ -95,7 +100,7 @@ class Board:
         try:
             prev_turn = self.unmake_list.pop()
         except IndexError:
-            print("ERROR\n\n\n\n\n\nERROR")
+            log.warning("Attempted to retract turn with empty unmake list")
             return
         
         self.turn_count -= 1
