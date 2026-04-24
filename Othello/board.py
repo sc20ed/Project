@@ -223,6 +223,8 @@ class Board:
                 else:
                     break
 
+        return False
+
     
     # check what legal moves are available
     def find_moves(self, player, opponent):
