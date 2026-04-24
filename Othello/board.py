@@ -10,7 +10,6 @@ class Board:
         self.weight_grid = []
         self.max_moves = (size*size) - 4
         self.size = size + 2
-        self.frontier = set()
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
