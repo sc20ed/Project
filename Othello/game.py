@@ -17,17 +17,17 @@ def turn(board, p_type):
         moves = board.find_moves(player, opponent)
         if len(moves) > 0:
             move = moves[randint(0, len(moves)-1)]
-            log.debug("Selected move %s", move)
+            log.debug("Randomly selected move %s", move)
 
     elif p_type == 1:
         maximising = bool(player+1)
         move, score = minimax(board, 4, maximising)
-        log.debug("Selected move %s with score %d", move, score)
+        log.debug("Minimax search selected move %s with score %d", move, score)
 
     elif p_type == 2:
         maximising = bool(player+1)
         move, score = alpha_beta(board, 5, maximising)
-        log.debug("Selected move %s with score %d", move, score)
+        log.debug("Alpha-beta search selected move %s with score %d", move, score)
 
     elif p_type == 3:
         # player move selection for testing
@@ -38,24 +38,24 @@ def turn(board, p_type):
                 print(moves)
                 choice = int(input("Select a move from the list (i.e. \'1\', \'2\' etc.): ")) - 1
                 move = moves[choice]
-                log.debug("Selected move %s", move)
+                log.debug("Player selected move %s", move)
 
             else:
-                print("No moves, turn passed.")
+                print("No move available, turn passed.")
 
         except (ValueError, IndexError):
             print("Invalid selection. First move selected by default.")
             move = moves[0]
-            log.debug("Selected move %s", move)
+            log.debug("Invalid player selection, selected move %s", move)
     
     # make move or pass if none are available
     if move == (-1, -1) or move == None:
-        log.debug("No move available, passing turn")
         board.advance_turn(1)
+        log.debug("No move available, turn passed")
         return 1
     else:
-        log.debug("Making move %s", move)
         board.make_move(player, opponent, (move))
+        log.debug("Made move")
         board.advance_turn(0)
         return 0
 
