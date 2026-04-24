@@ -7,7 +7,6 @@ from search import minimax, alpha_beta
 def turn(board, p_type):
     player = board.whose_turn
     opponent = player * -1
-    maximising = bool(player+1)
     move = None
 
 
@@ -18,9 +17,11 @@ def turn(board, p_type):
             move = moves[randint(0, len(moves)-1)]
 
     elif p_type == 1:
+        maximising = bool(player+1)
         move, score = minimax(board, 4, maximising)
 
     elif p_type == 2:
+        maximising = bool(player+1)
         move, score = alpha_beta(board, 5, maximising)
 
     elif p_type == 3:
@@ -48,11 +49,6 @@ def turn(board, p_type):
         board.make_move(player, opponent, (move))
         board.advance_turn(0)
         return 0
-    
-
-# return whether the board is full
-def board_is_full(move_count, board_size):
-    return move_count + 4 >= (board_size * board_size)
 
 
 # run game based on arguments
@@ -61,8 +57,11 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
 
     # initialise board a with set number of random moves
     board = Board(size)
-    for i in range(n_random_moves):
-        turn(board, 0)
+    if n_random_moves > 0:
+        for i in range(n_random_moves):
+            turn(board, 0)
+        board.display()
+        print("")
 
     # adjust turn order
     if n_random_moves % 2 == 1:
@@ -74,13 +73,13 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
         p1_pass = turn(board, p1_type)
         board.display()
         print("")
-        if board_is_full(board.move_count, size):
+        if board.move_count >= board.max_moves:
             break
 
         p2_pass = turn(board, p2_type)
         board.display()
         print("")
-        if board_is_full(board.move_count, size):
+        if board.move_count >= board.max_moves:
             break
         
         if p1_pass == 1 and p2_pass == 1:

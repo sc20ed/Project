@@ -56,7 +56,7 @@ def minimax(board, depth, maximising):
 
 # minimax with alpha-beta pruning
 def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
-    if depth == 0 or board.move_count >= 60:
+    if depth == 0 or board.move_count >= board.max_moves:
         return None, board.heuristics()
     
     # MAX PLAYER

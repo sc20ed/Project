@@ -3,6 +3,7 @@ class Board:
     def __init__(self, size=8):
         self.board = []
         self.weight_grid = []
+        self.max_moves = (size*size) - 4
         self.size = size + 2
         self.frontier = set()
         self.move_count = 0
