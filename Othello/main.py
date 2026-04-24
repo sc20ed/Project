@@ -2,7 +2,8 @@ from game import run_game
 import logging
 
 log = logging.getLogger(__name__)
-logging.basicConfig(filename="log.txt", format='%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s',
+logging.basicConfig(filename="log.txt", filemode="w",
+                    format='%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', encoding="utf-8", level=logging.DEBUG)
 
 # prompt user to change the logging level
@@ -40,20 +41,25 @@ def main():
         option = int(input("Select an option: "))
 
         if option == 1:
+            log.info("Starting CPU vs CPU game")
             winner, score = run_game(8, 0, 2, 0)
             print(f"WINNER: Player {(winner+3)%3}")
             print(f"SCORE: {score[0]} - {score[1]}")
+            log.info("Player %s win with score %s", winner, score)
 
         elif option == 2:
+            log.info("Starting Player vs CPU game")
             winner, score = run_game(8, 3, 2, 0)
             print(f"WINNER: Player {(winner+3)%3}")
             print(f"SCORE: {score[0]} - {score[1]}")
+            log.info("Player %s win with score %s", winner, score)
 
         elif option == 3:
             set_logging_level()
+            log.info("Logging level set to %s", logging.getLevelName(log.getEffectiveLevel()))
 
         elif option == 4:
-            pass
+            log.info("User exit")
 
         else:
             print("\nInvalid option.")
