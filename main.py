@@ -1,4 +1,4 @@
-from game import run_game
+from othello.game import run_game
 import logging
 
 # create log and set config

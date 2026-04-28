@@ -1,5 +1,5 @@
-from board import Board
-from search import minimax, alpha_beta
+from othello.board import Board
+from othello.search import minimax, alpha_beta
 from random import randint
 import logging
 

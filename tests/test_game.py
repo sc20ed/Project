@@ -1,4 +1,5 @@
 import unittest
+from othello.game import run_game, turn
 
 
 class TestGame(unittest.TestCase):
