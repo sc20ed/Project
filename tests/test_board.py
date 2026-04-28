@@ -342,7 +342,7 @@ class TestMoveMaking(unittest.TestCase):
         self.assertEqual(self.board.board, ex_board)
 
 
-# test that frontier and move validation function correctly
+# test that move validation functions correctly
 class TestMoveValidation(unittest.TestCase):
     def setUp(self):
         self.board = Board(8)
@@ -408,7 +408,7 @@ class TestMoveValidation(unittest.TestCase):
         self.assertFalse(move_is_valid)
 
 
-# test that frontier and move validation function correctly
+# test that frontier generation functions correctly
 class TestFrontier(unittest.TestCase):
     def setUp(self):
         self.board = Board(8)
