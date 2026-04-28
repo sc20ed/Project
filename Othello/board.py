@@ -96,12 +96,7 @@ class Board:
 
     # revert to previous turn and heuristics 
     def retract_turn(self):
-        try:
-            prev_turn = self.unmake_list.pop()
-        except IndexError:
-            log.warning("Attempted to retract turn with empty unmake list")
-            return
-        
+        prev_turn = self.unmake_list.pop()
         self.turn_count -= 1
 
         if prev_turn[1] == -1:
