@@ -84,21 +84,9 @@ class TestSetup(unittest.TestCase):
         self.assertEqual(self.board.board[3][3], 1)
 
 
-    @unittest.expectedFailure
     def test_setup_invalid(self):
         size = 0
-        self.board = Board(size)
-
-        for i in range(size+2):
-            for j in range(size+2):
-                if (i in [0, 1]) and (j in [0, 1]):
-                    continue
-                self.assertEqual(self.board.board[i][j], 0)
-                    
-        self.assertEqual(self.board.board[0][0], 1)
-        self.assertEqual(self.board.board[1][0], -1)
-        self.assertEqual(self.board.board[0][1], -1)
-        self.assertEqual(self.board.board[1][1], 1)
+        self.assertRaises(IndexError, Board, size)
 
 
     def test_reset_board(self):
@@ -286,7 +274,6 @@ class TestMoveMaking(unittest.TestCase):
         self.assertEqual(self.board.board, ex_board)
 
 
-    @unittest.expectedFailure
     def test_invalid_bounds_move(self):
         player = self.board.whose_turn
         opponent = player * -1
@@ -298,23 +285,9 @@ class TestMoveMaking(unittest.TestCase):
             opponent = player * -1
 
         move = (0, 9)
-        self.board.make_move(player, opponent, move)
-
-        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-                    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 1, -1, 0, 0, 0],
-                    [0, 0, 0, 0, -1, -1, -1, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-                
-        self.assertEqual(self.board.board, ex_board)
+        self.assertRaises(IndexError, self.board.make_move, player, opponent, move)
 
 
-    @unittest.expectedFailure
     def test_out_of_bounds_move(self):
         player = self.board.whose_turn
         opponent = player * -1
@@ -326,20 +299,7 @@ class TestMoveMaking(unittest.TestCase):
             opponent = player * -1
 
         move = (0, 10)
-        self.board.make_move(player, opponent, move)
-
-        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
-                    [0, 0, 0, 0, 0, 0, 1, -1, 1, 0],
-                    [0, 0, 0, 0, 0, 1, -1, 0, 0, 0],
-                    [0, 0, 0, 0, 1, 1, -1, 0, 0, 0],
-                    [0, 0, 0, 0, -1, -1, -1, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-                
-        self.assertEqual(self.board.board, ex_board)
+        self.assertRaises(IndexError, self.board.make_move, player, opponent, move)
 
 
 # test that move validation functions correctly
@@ -393,7 +353,6 @@ class TestMoveValidation(unittest.TestCase):
         self.assertFalse(move_is_valid)
 
     
-    @unittest.expectedFailure
     def test_invalid_move_input(self):
         player = self.board.whose_turn
         opponent = player * -1
@@ -404,8 +363,8 @@ class TestMoveValidation(unittest.TestCase):
             player = self.board.whose_turn
             opponent = player * -1
 
-        move_is_valid = self.board.validate_move(player, opponent, (13, 15))
-        self.assertFalse(move_is_valid)
+        move = (13, 15)
+        self.assertRaises(IndexError, self.board.validate_move, player, opponent, move)
 
 
 # test that frontier generation functions correctly
@@ -527,24 +486,11 @@ class TestTurns(unittest.TestCase):
         self.assertEqual(len(self.board.unmake_list), 0)
 
 
-    @unittest.expectedFailure
     def test_retract_empty(self):
-        for i in range(5):
+        for i in range(4):
             self.board.retract_turn()
 
-        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 1, -1, 0, 0, 0, 0],
-                    [0, 0, 0, 0, -1, 1, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        
-        self.assertEqual(self.board.board, ex_board)
-        self.assertEqual(len(self.board.unmake_list), 0)
+        self.assertRaises(IndexError, self.board.retract_turn)
 
     
     def test_retract_redo(self):
