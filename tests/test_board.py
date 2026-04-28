@@ -108,7 +108,7 @@ class TestSetup(unittest.TestCase):
 
         for i in range(size+2):
             for j in range(size+2):
-                self.assertEqual(self.board.board[i][j], 0)
+                self.assertEqual(self.board.board[i][j], 0)        
 
 
 # test that move making functions correctly
@@ -119,7 +119,7 @@ class TestMoveMaking(unittest.TestCase):
                       (2, 8), (1, 8), (3, 5), (5, 6)]
 
 
-    def test_make_initial_move(self):
+    def test_initial_move(self):
         player = self.board.whose_turn
         opponent = player * -1
         move = self.moves[0]
@@ -131,6 +131,57 @@ class TestMoveMaking(unittest.TestCase):
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
                     [0, 0, 0, 0, -1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        self.assertEqual(self.board.board, ex_board)
+
+
+    def test_wrong_move(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+        move = self.moves[2]
+        self.board.make_move(player, opponent, move)
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, -1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        self.assertEqual(self.board.board, ex_board)
+    
+
+    def test_gap_move(self):
+        self.board.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 1, -1, -1, 0, 0, 0, 0],
+                            [0, 0, 0, 0, -1, -1, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        player = self.board.whose_turn
+        opponent = player * -1
+        move = (3, 7)
+        self.board.make_move(player, opponent, move)
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, -1, -1, 0, 1, 0, 0],
+                    [0, 0, 0, 0, -1, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -162,8 +213,81 @@ class TestMoveMaking(unittest.TestCase):
                 
         self.assertEqual(self.board.board, ex_board)
 
-    ########################################### PICK UP HERE
-    def test_(self):
+    
+    def test_flip_full_board(self):
+        self.board.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, 1, -1, -1, -1, -1, -1, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        player = self.board.whose_turn
+        opponent = player * -1
+        moves = [(8, 7), (1, 1), (1, 2), (1, 3),
+                 (1, 4), (1, 5), (1, 6), (8, 8),
+                 (1, 7), (1, 8)]
+
+        for move in moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            self.board.advance_turn(1)
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        self.assertEqual(self.board.board, ex_board)
+
+
+    def test_full_four_corner_moves(self):
+        self.board.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, -1, -1, -1, -1, -1, -1, 0, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, 1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, -1, -1, -1, -1, -1, -1, -1, -1, 0],
+                            [0, 0, -1, -1, -1, -1, -1, -1, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        player = self.board.whose_turn
+        opponent = player * -1
+        moves = [(1, 1), (1, 8), (8, 1), (8, 8)]
+
+        for move in moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            self.board.advance_turn(1)
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 1, 1, -1, -1, -1, -1, 1, 1, 0],
+                    [0, 1, -1, 1, -1, -1, 1, -1, 1, 0],
+                    [0, 1, -1, -1, 1, 1, -1, -1, 1, 0],
+                    [0, 1, -1, -1, 1, 1, -1, -1, 1, 0],
+                    [0, 1, -1, 1, -1, -1, 1, -1, 1, 0],
+                    [0, 1, 1, -1, -1, -1, -1, 1, 1, 0],
+                    [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        self.assertEqual(self.board.board, ex_board)
+
+
+    @unittest.expectedFailure
+    def test_invalid_bounds_move(self):
         player = self.board.whose_turn
         opponent = player * -1
         
@@ -172,6 +296,37 @@ class TestMoveMaking(unittest.TestCase):
             self.board.advance_turn(0)
             player = self.board.whose_turn
             opponent = player * -1
+
+        move = (0, 9)
+        self.board.make_move(player, opponent, move)
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, -1, 0, 0, 0],
+                    [0, 0, 0, 0, -1, -1, -1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                
+        self.assertEqual(self.board.board, ex_board)
+
+
+    @unittest.expectedFailure
+    def test_out_of_bounds_move(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+        
+        for move in self.moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+        move = (0, 10)
+        self.board.make_move(player, opponent, move)
 
         ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
@@ -188,7 +343,73 @@ class TestMoveMaking(unittest.TestCase):
 
 
 # test that frontier and move validation function correctly
-class TestFrontierAndMoveValidation(unittest.TestCase):
+class TestMoveValidation(unittest.TestCase):
+    def setUp(self):
+        self.board = Board(8)
+        self.moves = [(3, 5), (5, 6), (6, 3), (2, 5),
+                      (4, 6), (3, 6), (5, 7), (6, 8),
+                      (5, 8)]
+        
+        
+    def test_valid_move(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+
+        for move in self.moves[:4]:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+        move_is_valid = self.board.validate_move(player, opponent, (2, 6))
+        self.assertTrue(move_is_valid)
+
+    
+    def test_invalid_move_1(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+
+        for move in self.moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+        move_is_valid = self.board.validate_move(player, opponent, (6, 7))
+        self.assertFalse(move_is_valid)
+
+
+    def test_invalid_move_1(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+
+        for move in self.moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+        move_is_valid = self.board.validate_move(player, opponent, (4, 1))
+        self.assertFalse(move_is_valid)
+
+    
+    @unittest.expectedFailure
+    def test_invalid_move_input(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+
+        for move in self.moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+        move_is_valid = self.board.validate_move(player, opponent, (13, 15))
+        self.assertFalse(move_is_valid)
+
+
+# test that frontier and move validation function correctly
+class TestFrontier(unittest.TestCase):
     def setUp(self):
         self.board = Board(8)
         self.moves = [(3, 5), (5, 6), (6, 3), (2, 5),
@@ -253,49 +474,6 @@ class TestFrontierAndMoveValidation(unittest.TestCase):
         frontier = self.board.find_frontier(opponent)
         self.assertEqual(frontier, [])
 
-    
-    def test_valid_move(self):
-        player = self.board.whose_turn
-        opponent = player * -1
-
-        for move in self.moves[:4]:
-            self.board.make_move(player, opponent, move)
-            self.board.advance_turn(0)
-            player = self.board.whose_turn
-            opponent = player * -1
-
-        move_is_valid = self.board.validate_move(player, opponent, (2, 6))
-        self.assertTrue(move_is_valid)
-
-    
-    def test_invalid_move(self):
-        player = self.board.whose_turn
-        opponent = player * -1
-
-        for move in self.moves:
-            self.board.make_move(player, opponent, move)
-            self.board.advance_turn(0)
-            player = self.board.whose_turn
-            opponent = player * -1
-
-        move_is_valid = self.board.validate_move(player, opponent, (6, 7))
-        self.assertFalse(move_is_valid)
-
-    
-    @unittest.expectedFailure
-    def test_invalid_move_input(self):
-        player = self.board.whose_turn
-        opponent = player * -1
-
-        for move in self.moves:
-            self.board.make_move(player, opponent, move)
-            self.board.advance_turn(0)
-            player = self.board.whose_turn
-            opponent = player * -1
-
-        move_is_valid = self.board.validate_move(player, opponent, (13, 15))
-        self.assertFalse(move_is_valid)
-
 
 # test that turn passing and unmaking function correctly
 class TestTurns(unittest.TestCase):
@@ -313,23 +491,111 @@ class TestTurns(unittest.TestCase):
 
 
     def test_retract(self):
-        self.board
+        self.board.retract_turn()
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, -1, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.assertEqual(self.board.board, ex_board)
+        self.assertEqual(len(self.board.unmake_list), 3)
+        
 
 
     def test_retract_all(self):
-        self.board
+        for i in range(4):
+            self.board.retract_turn()
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, -1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.assertEqual(self.board.board, ex_board)
+        self.assertEqual(len(self.board.unmake_list), 0)
 
 
+    @unittest.expectedFailure
     def test_retract_empty(self):
-        self.board
+        for i in range(5):
+            self.board.retract_turn()
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, -1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.assertEqual(self.board.board, ex_board)
+        self.assertEqual(len(self.board.unmake_list), 0)
 
     
     def test_retract_redo(self):
-        self.board
+        self.board.retract_turn()
+        player = self.board.whose_turn
+        opponent = player * -1
+        self.board.make_move(player, opponent, (2, 5))
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, -1, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.assertEqual(self.board.board, ex_board)
+        self.assertEqual(len(self.board.unmake_list), 4)
+
+    
+    def test_retract_redo_retract(self):
+        self.board.retract_turn()
+        player = self.board.whose_turn
+        opponent = player * -1
+        self.board.make_move(player, opponent, (2, 5))
+        self.board.advance_turn(0)
+        self.board.retract_turn()
+
+        ex_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, -1, -1, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.assertEqual(self.board.board, ex_board)
+        self.assertEqual(len(self.board.unmake_list), 3)
 
 
     def test_pass(self):
-        self.board
+        self.board.advance_turn(1)
+        self.assertEqual(self.board.whose_turn, -1)
+        self.assertEqual(len(self.board.unmake_list), 5)
+        self.assertEqual(self.board.unmake_list[4][1], -1)
 
 
 # test that game over functions correctly
