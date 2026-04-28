@@ -8,13 +8,12 @@ class Board:
     def __init__(self, size=8):
         self.board = []
         self.weight_grid = []
-        self.max_moves = (size*size) - 4
+        self.unmake_list = []
         self.size = size + 2
+        self.max_moves = (size*size) - 4
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
-        self.unmake_list = []
-
         self.square_difference = 0
         self.wg_score = 0
 
@@ -61,11 +60,20 @@ class Board:
         self.weight_grid[self.size-3][self.size-3] = -25
 
 
-    # reset board
+    # reset board and values
     def reset(self):
+        self.unmake_list = []
+        self.move_count = 0
+        self.turn_count = 0
+        self.whose_turn = 1
+        self.square_difference = 0
+        self.wg_score = 0
+
         for j in range(1, self.size-1):
             for i in range(1, self.size-1):
                 self.board[i][j] = 0
+
+        self.setup()
 
 
     # print board to terminal
