@@ -2,19 +2,18 @@ import logging
 
 log = logging.getLogger("board.py")
 
+
 # object to handle current board, game state and heuristics
 class Board:
     def __init__(self, size=8):
         self.board = []
         self.weight_grid = []
-        self.max_moves = (size*size) - 4
+        self.unmake_list = []
         self.size = size + 2
-        self.frontier = set()
+        self.max_moves = (size*size) - 4
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
-        self.unmake_list = []
-
         self.square_difference = 0
         self.wg_score = 0
 
@@ -36,12 +35,11 @@ class Board:
     # create initial game position and weighted squares heuristic
     def setup(self):
         midpoint = int(self.size/2)
-        self.board[midpoint][midpoint] = 1
-        self.board[midpoint][midpoint-1] = -1
-        self.board[midpoint-1][midpoint] = -1
         self.board[midpoint-1][midpoint-1] = 1
+        self.board[midpoint-1][midpoint] = -1
+        self.board[midpoint][midpoint-1] = -1
+        self.board[midpoint][midpoint] = 1
         
-
         # switch to file later
         self.weight_grid[1][1] = 50
         self.weight_grid[1][self.size-2] = 50
@@ -62,11 +60,20 @@ class Board:
         self.weight_grid[self.size-3][self.size-3] = -25
 
 
-    # reset board
+    # reset board and values
     def reset(self):
+        self.unmake_list = []
+        self.move_count = 0
+        self.turn_count = 0
+        self.whose_turn = 1
+        self.square_difference = 0
+        self.wg_score = 0
+
         for j in range(1, self.size-1):
             for i in range(1, self.size-1):
                 self.board[i][j] = 0
+
+        self.setup()
 
 
     # print board to terminal
@@ -85,8 +92,8 @@ class Board:
             print("")
 
     # update turn count and current player
-    def advance_turn(self, skipped):
-        if not skipped:
+    def advance_turn(self, passed):
+        if not passed:
             self.move_count += 1
         else:
             self.unmake_list.append([self.square_difference, -1])
@@ -97,12 +104,7 @@ class Board:
 
     # revert to previous turn and heuristics 
     def retract_turn(self):
-        try:
-            prev_turn = self.unmake_list.pop()
-        except IndexError:
-            log.warning("Attempted to retract turn with empty unmake list")
-            return
-        
+        prev_turn = self.unmake_list.pop()
         self.turn_count -= 1
 
         if prev_turn[1] == -1:
@@ -223,6 +225,8 @@ class Board:
                     return True
                 else:
                     break
+
+        return False
 
     
     # check what legal moves are available
@@ -394,9 +398,3 @@ class Board:
                 self.wg_score)
 
         return score
-        
-
-    
-
-
-    
