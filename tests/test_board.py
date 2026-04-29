@@ -5,98 +5,105 @@ from othello.board import Board
 # test that the board is set up correctly
 class TestSetup(unittest.TestCase):
     def test_setup_8(self):
-        size = 8
-        self.board = Board(size)
+        board = Board(8)
 
-        for i in range(size+2):
-            for j in range(size+2):
+        for i in range(board.size):
+            for j in range(board.size):
                 if (i in [4, 5]) and (j in [4, 5]):
                     continue
-                self.assertEqual(self.board.board[i][j], 0)
+                self.assertEqual(board.board[i][j], 0)
                     
-        self.assertEqual(self.board.board[4][4], 1)
-        self.assertEqual(self.board.board[5][4], -1)
-        self.assertEqual(self.board.board[4][5], -1)
-        self.assertEqual(self.board.board[5][5], 1)
+        self.assertEqual(board.board[4][4], 1)
+        self.assertEqual(board.board[5][4], -1)
+        self.assertEqual(board.board[4][5], -1)
+        self.assertEqual(board.board[5][5], 1)
 
 
     def test_setup_10(self):
-        size = 10
-        self.board = Board(size)
+        board = Board(10)
 
-        for i in range(size+2):
-            for j in range(size+2):
+        for i in range(board.size):
+            for j in range(board.size):
                 if (i in [5, 6]) and (j in [5, 6]):
                     continue
-                self.assertEqual(self.board.board[i][j], 0)
+                self.assertEqual(board.board[i][j], 0)
                     
-        self.assertEqual(self.board.board[5][5], 1)
-        self.assertEqual(self.board.board[6][5], -1)
-        self.assertEqual(self.board.board[5][6], -1)
-        self.assertEqual(self.board.board[6][6], 1)
+        self.assertEqual(board.board[5][5], 1)
+        self.assertEqual(board.board[6][5], -1)
+        self.assertEqual(board.board[5][6], -1)
+        self.assertEqual(board.board[6][6], 1)
 
 
     def test_setup_64(self):
-        size = 64
-        self.board = Board(size)
+        board = Board(64)
 
-        for i in range(size+2):
-            for j in range(size+2):
+        for i in range(board.size):
+            for j in range(board.size):
                 if (i in [32, 33]) and (j in [32, 33]):
                     continue
-                self.assertEqual(self.board.board[i][j], 0)
+                self.assertEqual(board.board[i][j], 0)
                     
-        self.assertEqual(self.board.board[32][32], 1)
-        self.assertEqual(self.board.board[33][32], -1)
-        self.assertEqual(self.board.board[32][33], -1)
-        self.assertEqual(self.board.board[33][33], 1)
+        self.assertEqual(board.board[32][32], 1)
+        self.assertEqual(board.board[33][32], -1)
+        self.assertEqual(board.board[32][33], -1)
+        self.assertEqual(board.board[33][33], 1)
 
 
     def test_setup_odd(self):
-        size = 7
-        self.board = Board(size)
+        board = Board(7)
 
-        for i in range(size+2):
-            for j in range(size+2):
+        for i in range(board.size):
+            for j in range(board.size):
                 if (i in [3, 4]) and (j in [3, 4]):
                     continue
-                self.assertEqual(self.board.board[i][j], 0)
+                self.assertEqual(board.board[i][j], 0)
                     
-        self.assertEqual(self.board.board[3][3], 1)
-        self.assertEqual(self.board.board[4][3], -1)
-        self.assertEqual(self.board.board[3][4], -1)
-        self.assertEqual(self.board.board[4][4], 1)
+        self.assertEqual(board.board[3][3], 1)
+        self.assertEqual(board.board[4][3], -1)
+        self.assertEqual(board.board[3][4], -1)
+        self.assertEqual(board.board[4][4], 1)
 
 
     def test_setup_small(self):
-        size = 4
-        self.board = Board(size)
+        board = Board(4)
 
-        for i in range(size+2):
-            for j in range(size+2):
+        for i in range(board.size):
+            for j in range(board.size):
                 if (i in [2, 3]) and (j in [2, 3]):
                     continue
-                self.assertEqual(self.board.board[i][j], 0)
+                self.assertEqual(board.board[i][j], 0)
                     
-        self.assertEqual(self.board.board[2][2], 1)
-        self.assertEqual(self.board.board[3][2], -1)
-        self.assertEqual(self.board.board[2][3], -1)
-        self.assertEqual(self.board.board[3][3], 1)
+        self.assertEqual(board.board[2][2], 1)
+        self.assertEqual(board.board[3][2], -1)
+        self.assertEqual(board.board[2][3], -1)
+        self.assertEqual(board.board[3][3], 1)
 
 
     def test_setup_invalid(self):
-        size = 0
-        self.assertRaises(IndexError, Board, size)
+        self.assertRaises(IndexError, Board, 0)
 
 
     def test_reset_board(self):
-        size = 8
-        self.board = Board(size)
-        self.board.reset()
+        board = Board(8)
+        player = board.whose_turn
+        opponent = player * -1
+        moves = [(3, 5), (5, 6), (6, 3), (2, 5)]
 
-        for i in range(size+2):
-            for j in range(size+2):
-                self.assertEqual(self.board.board[i][j], 0)        
+        for move in moves:
+            board.make_move(player, opponent, move)
+            board.advance_turn(0)
+            player = board.whose_turn
+            opponent = player * -1
+
+        board.reset()
+        for i in range(board.size):
+            for j in range(board.size):
+                if (i in [4, 5]) and (j in [4, 5]):
+                    continue
+                self.assertEqual(board.board[i][j], 0)
+
+        self.assertEqual(board.turn_count, 0)
+        self.assertEqual(board.move_count, 0)
 
 
 # test that move making functions correctly

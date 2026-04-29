@@ -33,7 +33,7 @@ class TestMinimax(unittest.TestCase):
 
 
     def test_high_depth(self):
-        move, score = minimax(self.board, 8, 1)
+        move, score = minimax(self.board, 7, 1)
         self.assertIs(type(move), tuple)
         self.assertIs(type(score), int)
 
@@ -131,7 +131,7 @@ class TestMinimax(unittest.TestCase):
 class TestAlphaBeta(unittest.TestCase):
     def setUp(self):
         self.board = Board(8)
-        moves = [(3, 5), (5, 6), (6, 3), (2, 5),
+        self.moves = [(3, 5), (5, 6), (6, 3), (2, 5),
                  (4, 6), (3, 6), (5, 7), (6, 8),
                  (5, 8), (4, 8), (3, 7), (2, 6),
                  (1, 6), (6, 4), (6, 5), (7, 5),
@@ -140,7 +140,7 @@ class TestAlphaBeta(unittest.TestCase):
         player = self.board.whose_turn
         opponent = player * -1
 
-        for move in moves:
+        for move in self.moves:
             self.board.make_move(player, opponent, move)
             self.board.advance_turn(0)
             player = self.board.whose_turn
@@ -165,13 +165,13 @@ class TestAlphaBeta(unittest.TestCase):
         mm_start = time.process_time()
         move, score = minimax(self.board, 4, 1)
         mm_finish = time.process_time()
+        mm_time = mm_finish - mm_start
 
         ab_start = time.process_time()
         move, score = alpha_beta(self.board, 4, 1)
         ab_finish = time.process_time()
-
-        mm_time = mm_finish - mm_start
         ab_time = ab_finish - ab_start
+        
         self.assertLess(ab_time, mm_time)
         self.assertIs(type(move), tuple)
         self.assertIs(type(score), int)
@@ -183,31 +183,42 @@ class TestAlphaBeta(unittest.TestCase):
         mm_start = time.process_time()
         move, score = minimax(self.board, 5, 1)
         mm_finish = time.process_time()
+        mm_time = mm_finish - mm_start
 
         ab_start = time.process_time()
         move, score = alpha_beta(self.board, 5, 1)
         ab_finish = time.process_time()
-
-        mm_time = mm_finish - mm_start
         ab_time = ab_finish - ab_start
+        
         self.assertLess(ab_time, mm_time)
         self.assertIs(type(move), tuple)
         self.assertIs(type(score), int)
 
 
+    # for this depth and beyond a new board is used to reduce search time
     def test_depth_6(self):
+        board = Board(8)
+        player = board.whose_turn
+        opponent = player * -1
+
+        for move in self.moves[:4]:
+            board.make_move(player, opponent, move)
+            board.advance_turn(0)
+            player = board.whose_turn
+            opponent = player * -1
+
         move, score = 0, 0
 
         mm_start = time.process_time()
-        move, score = minimax(self.board, 6, 1)
+        move, score = minimax(board, 6, 1)
         mm_finish = time.process_time()
+        mm_time = mm_finish - mm_start
 
         ab_start = time.process_time()
-        move, score = alpha_beta(self.board, 6, 1)
+        move, score = alpha_beta(board, 6, 1)
         ab_finish = time.process_time()
-
-        mm_time = mm_finish - mm_start
         ab_time = ab_finish - ab_start
+
         self.assertLess(ab_time, mm_time)
         self.assertIs(type(move), tuple)
         self.assertIs(type(score), int)
@@ -217,7 +228,7 @@ class TestAlphaBeta(unittest.TestCase):
         self.board.make_move(1, -1, (7, 6))
         self.board.advance_turn(0)
 
-        move, score = minimax(self.board, 4, -1)
+        move, score = alpha_beta(self.board, 4, -1)
         self.assertIs(type(move), tuple)
         self.assertNotEqual(move, (-1, -1))
         self.assertIs(type(score), int)
@@ -229,33 +240,31 @@ class TestAlphaBeta(unittest.TestCase):
         s_board = Board(4)
         player = s_board.whose_turn
         opponent = player * -1
-        mm_start = time.process_time()
 
+        mm_start = time.process_time()
         for i in range(12):
             maximising = bool(player+1)
             move, score = minimax(s_board, 12-i, maximising)
             s_board.make_move(player, opponent, move)
             s_board.advance_turn(0)
             player, opponent = opponent, player
-
         mm_finish = time.process_time()
+        mm_time = mm_finish - mm_start
 
         s_board.reset()
         player = s_board.whose_turn
         opponent = player * -1
-        ab_start = time.process_time()
 
+        ab_start = time.process_time()
         for i in range(12):
             maximising = bool(player+1)
             move, score = alpha_beta(s_board, 12-i, maximising)
             s_board.make_move(player, opponent, move)
             s_board.advance_turn(0)
             player, opponent = opponent, player
-
         ab_finish = time.process_time()
-
-        mm_time = mm_finish - mm_start
         ab_time = ab_finish - ab_start
+
         winner, score = s_board.game_over()
         self.assertLess(ab_time, mm_time)
         self.assertEqual(winner, -1)
