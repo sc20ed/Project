@@ -398,9 +398,3 @@ class Board:
                 self.wg_score)
 
         return score
-        
-
-    
-
-
-    

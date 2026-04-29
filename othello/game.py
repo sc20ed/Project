@@ -74,10 +74,10 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
         board.display()
         print("")
 
-    # adjust turn order - may be unnecessary
-    if n_random_moves % 2 == 1:
-        p1_type, p2_type = p2_type, p1_type
-        log.debug("Swapped turn order to offset odd number of random moves")
+        # adjust turn order
+        if n_random_moves % 2 == 1:
+            p1_type, p2_type = p2_type, p1_type
+            log.debug("Swapped turn order to offset odd number of random moves")
 
     # main game loop
     active = 1

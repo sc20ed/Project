@@ -434,8 +434,8 @@ class TestFrontier(unittest.TestCase):
         self.assertEqual(frontier, [])
 
 
-# test that turn passing and unmaking function correctly
-class TestTurns(unittest.TestCase):
+# test that turn passing and retracting function correctly
+class TestRetractTurn(unittest.TestCase):
     def setUp(self):
         self.board = Board(8)
         moves = [(3, 5), (5, 6), (6, 3), (2, 5)]
