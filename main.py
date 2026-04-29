@@ -3,7 +3,7 @@ import logging
 
 # create log and set config
 log = logging.getLogger("main.py")
-logging.basicConfig(filename="log.txt", filemode="w",
+logging.basicConfig(filename="othello/log.txt", filemode="w",
                     format='%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p', encoding="utf-8", level=logging.INFO)
 
