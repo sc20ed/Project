@@ -29,26 +29,32 @@ class Board:
                 row.append(0)
             self.weight_grid.append(row)
 
-        self.setup()
+        midpoint = int(self.size/2)
+        self.setup(midpoint)
+
+        # move later?
+        with open(file="weight_list.txt", mode='r', encoding="utf-8") as wl:
+            next(wl)
+            weights = [int(weight) for weight in wl.readline().strip('\n').split(',')]
+        
+        if self.size > 6:
+            self.setup_weight_grid(weights, midpoint)
+        else:
+            pass
+            #self.setup_weight_grid_simple(weights, midpoint)
     
 
     # create initial game position and read heuristic weights
-    def setup(self):
-        midpoint = int(self.size/2)
+    def setup(self, midpoint):
         self.board[midpoint-1][midpoint-1] = 1
         self.board[midpoint-1][midpoint] = -1
         self.board[midpoint][midpoint-1] = -1
         self.board[midpoint][midpoint] = 1
 
-        with open(file="weight_list.txt", mode='r', encoding="utf-8") as wl:
-            next(wl)
-            weights = wl.readline().strip('\n').split(',')
-
-        self.setup_weight_grid(weights, midpoint)
 
     # create weighted squares grid for current board
     def setup_weight_grid(self, weights, midpoint):
-        size = self.size # for readability
+        size = self.size # for readability            
 
         # weights are laid out by index as follows:
         # 0
@@ -56,48 +62,66 @@ class Board:
         # 3 4 5
         # 6 7 8 9
         # and are then used to fill out the board symmetrically
-        # if the board size is greater than 8, weights 6 7 and 8 are used
-        # to fill in the additional space
+
+        # for board sizes larger than 8 the following extension applies:
+        # 6 7 8 5
+        # 6 7 8 8 5
+        # 6 7 8 8 8 5
+        # . . . . . . .
+        # 6 7 8 8 8 8 8 9
+        # this ensures some function of the weighted squares grid for any board size
 
         # set up squares on main diagonals (4 instances each)
-        for i, j in [(1, 1), (1, size-2), (size-2, 1), (size-2, size-2)]:
-            self.weight_grid[i][j] = int(weights[0])
+        for x in range(1, 4 + int((size-10)/2)):
+            if x < 3:
+                if x == 1:
+                    weight_value = weights[0]
+                elif x == 2:
+                    weight_value = weights[2]
 
-        for i, j in [(2, 2), (2, size-3), (size-3, 2), (size-3, size-3)]:
-            self.weight_grid[i][j] = int(weights[2])
+            else:
+                weight_value = weights[5]
+        
+            for i, j in [(x, x), (x, size-(x+1)), (size-(x+1), x), (size-(x+1), size-(x+1))]:
+                self.weight_grid[i][j] = weight_value
 
-        for i, j in [(3, 3), (3, size-4), (size-4, 3), (size-4, size-4)]:
-            self.weight_grid[i][j] = int(weights[5])
+        # set up squares on edges (8 instances each)
+        for x in range(2, 5 + int((size-10)/2)):
+            if x < 4:
+                if x == 2:
+                    weight_value = weights[1]
+                else:
+                    weight_value = weights[3]
+            else:
+                weight_value = weights[6]
 
-        # set up squares not on main diagonals (8 instances each)
-        for i, j in [(1, 2), (1, size-3), (2, 1), (2, size-2),
-                     (size-3, 1), (size-3, size-2), (size-2, 2), (size-2, size-3)]:
-            self.weight_grid[i][j] = int(weights[1])
+            for i, j in [(1, x), (1, size-(x+1)), (x, 1), (x, size-2),
+                     (size-(x+1), 1), (size-(x+1), size-2), (size-2, x), (size-2, size-(x+1))]:
+                self.weight_grid[i][j] = weight_value
 
-        for i, j in [(1, 3), (1, size-4), (3, 1), (3, size-2),
-                     (size-4, 1), (size-4, size-2), (size-2, 3), (size-2, size-4)]:
-            self.weight_grid[i][j] = int(weights[3])
+        # set up squares not in main diagonals or edges (8 instances each)
+        for x in range(2, 4 + int((size-10)/2)):
+            if x == 2:
+                for y in range(x+1, 5 + int((size-10)/2)):
+                    for i, j in [(x, y), (x, size-(y+1)), (y, x), (y, size-(x+1)),
+                                 (size-(y+1), x), (size-(y+1), size-(x+1)),
+                                 (size-(x+1), y), (size-(x+1), size-(y+1))]:
+                        if y == 3:
+                            self.weight_grid[i][j] = weights[4]
+                        else:
+                            self.weight_grid[i][j] = weights[7]
 
-        for i, j in [(2, 3), (2, size-4), (3, 2), (3, size-3),
-                     (size-4, 2), (size-4, size-3), (size-3, 3), (size-3, size-4)]:
-            self.weight_grid[i][j] = int(weights[4])
-
-        for i, j in [(1, 4), (1, size-5), (4, 1), (4, size-2),
-                     (size-5, 1), (size-5, size-2), (size-2, 4), (size-2, size-5)]:
-            self.weight_grid[i][j] = int(weights[6])
-
-        for i, j in [(2, 4), (2, size-5), (4, 2), (4, size-3),
-                     (size-5, 2), (size-5, size-3), (size-3, 4), (size-3, size-5)]:
-            self.weight_grid[i][j] = int(weights[7])
-
-        for i, j in [(3, 4), (3, size-5), (4, 3), (4, size-4),
-                     (size-5, 3), (size-5, size-4), (size-4, 4), (size-4, size-5)]:
-            self.weight_grid[i][j] = int(weights[8])
-
+            else:
+                for y in range(x+1, 5 + int((size-10)/2)):
+                    for i, j in [(x, y), (x, size-(y+1)), (y, x), (y, size-(x+1)),
+                                 (size-(y+1), x), (size-(y+1), size-(x+1)),
+                                 (size-(x+1), y), (size-(x+1), size-(y+1))]:
+                        self.weight_grid[i][j] = weights[8]
+                    
         # midpoint
         for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
                      (midpoint, midpoint-1), (midpoint, midpoint)]:
-            self.weight_grid[i][j] = int(weights[9])
+            self.weight_grid[i][j] = weights[9]
 
 
     # reset board and values
