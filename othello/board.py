@@ -32,32 +32,72 @@ class Board:
         self.setup()
     
 
-    # create initial game position and weighted squares heuristic
+    # create initial game position and read heuristic weights
     def setup(self):
         midpoint = int(self.size/2)
         self.board[midpoint-1][midpoint-1] = 1
         self.board[midpoint-1][midpoint] = -1
         self.board[midpoint][midpoint-1] = -1
         self.board[midpoint][midpoint] = 1
-        
-        # switch to file later
-        self.weight_grid[1][1] = 50
-        self.weight_grid[1][self.size-2] = 50
-        self.weight_grid[self.size-2][1] = 50
-        self.weight_grid[self.size-2][self.size-2] = 50
 
-        self.weight_grid[2][1] = -25
-        self.weight_grid[1][2] = -25
-        self.weight_grid[2][2] = -25
-        self.weight_grid[2][self.size-2] = -25
-        self.weight_grid[1][self.size-3] = -25
-        self.weight_grid[2][self.size-3] = -25
-        self.weight_grid[self.size-3][1] = -25
-        self.weight_grid[self.size-2][2] = -25
-        self.weight_grid[self.size-3][2] = -25
-        self.weight_grid[self.size-3][self.size-2] = -25
-        self.weight_grid[self.size-2][self.size-3] = -25
-        self.weight_grid[self.size-3][self.size-3] = -25
+        with open(file="weight_list.txt", mode='r', encoding="utf-8") as wl:
+            next(wl)
+            weights = wl.readline().strip('\n').split(',')
+
+        self.setup_weight_grid(weights, midpoint)
+
+    # create weighted squares grid for current board
+    def setup_weight_grid(self, weights, midpoint):
+        size = self.size # for readability
+
+        # weights are laid out by index as follows:
+        # 0
+        # 1 2
+        # 3 4 5
+        # 6 7 8 9
+        # and are then used to fill out the board symmetrically
+        # if the board size is greater than 8, weights 6 7 and 8 are used
+        # to fill in the additional space
+
+        # set up squares on main diagonals (4 instances each)
+        for i, j in [(1, 1), (1, size-2), (size-2, 1), (size-2, size-2)]:
+            self.weight_grid[i][j] = int(weights[0])
+
+        for i, j in [(2, 2), (2, size-3), (size-3, 2), (size-3, size-3)]:
+            self.weight_grid[i][j] = int(weights[2])
+
+        for i, j in [(3, 3), (3, size-4), (size-4, 3), (size-4, size-4)]:
+            self.weight_grid[i][j] = int(weights[5])
+
+        # set up squares not on main diagonals (8 instances each)
+        for i, j in [(1, 2), (1, size-3), (2, 1), (2, size-2),
+                     (size-3, 1), (size-3, size-2), (size-2, 2), (size-2, size-3)]:
+            self.weight_grid[i][j] = int(weights[1])
+
+        for i, j in [(1, 3), (1, size-4), (3, 1), (3, size-2),
+                     (size-4, 1), (size-4, size-2), (size-2, 3), (size-2, size-4)]:
+            self.weight_grid[i][j] = int(weights[3])
+
+        for i, j in [(2, 3), (2, size-4), (3, 2), (3, size-3),
+                     (size-4, 2), (size-4, size-3), (size-3, 3), (size-3, size-4)]:
+            self.weight_grid[i][j] = int(weights[4])
+
+        for i, j in [(1, 4), (1, size-5), (4, 1), (4, size-2),
+                     (size-5, 1), (size-5, size-2), (size-2, 4), (size-2, size-5)]:
+            self.weight_grid[i][j] = int(weights[6])
+
+        for i, j in [(2, 4), (2, size-5), (4, 2), (4, size-3),
+                     (size-5, 2), (size-5, size-3), (size-3, 4), (size-3, size-5)]:
+            self.weight_grid[i][j] = int(weights[7])
+
+        for i, j in [(3, 4), (3, size-5), (4, 3), (4, size-4),
+                     (size-5, 3), (size-5, size-4), (size-4, 4), (size-4, size-5)]:
+            self.weight_grid[i][j] = int(weights[8])
+
+        # midpoint
+        for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
+                     (midpoint, midpoint-1), (midpoint, midpoint)]:
+            self.weight_grid[i][j] = int(weights[9])
 
 
     # reset board and values
@@ -366,6 +406,7 @@ class Board:
                 turn_change.append(square)
                 self.board[square[0]][square[1]] = player
                 self.square_difference += (player*2)
+                self.wg_score += self.weight_grid[move[0]][move[1]] * player
 
         self.unmake_list.append(turn_change)
 
@@ -395,6 +436,6 @@ class Board:
     # evaluation function
     def heuristics(self):
         score = (self.square_difference +
-                self.wg_score)
+                (self.wg_score/50))
 
         return score
