@@ -40,16 +40,17 @@ class Board:
         if self.size > 6:
             self.setup_weight_grid(weights, midpoint)
         else:
-            pass
-            #self.setup_weight_grid_simple(weights, midpoint)
+            self.setup_weight_grid_simple(weights, midpoint)
     
 
-    # create initial game position and read heuristic weights
+    # create initial game position
     def setup(self, midpoint):
-        self.board[midpoint-1][midpoint-1] = 1
-        self.board[midpoint-1][midpoint] = -1
-        self.board[midpoint][midpoint-1] = -1
-        self.board[midpoint][midpoint] = 1
+        for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
+                     (midpoint, midpoint-1), (midpoint, midpoint)]:
+            if i == j:
+                self.board[i][j] = 1
+            else:
+                self.board[i][j] = -1
 
 
     # create weighted squares grid for current board
@@ -99,7 +100,7 @@ class Board:
                      (size-(x+1), 1), (size-(x+1), size-2), (size-2, x), (size-2, size-(x+1))]:
                 self.weight_grid[i][j] = weight_value
 
-        # set up squares not in main diagonals or edges (8 instances each)
+        # set up squares not on main diagonals or edges (8 instances each)
         for x in range(2, 4 + int((size-10)/2)):
             if x == 2:
                 for y in range(x+1, 5 + int((size-10)/2)):
@@ -118,10 +119,33 @@ class Board:
                                  (size-(x+1), y), (size-(x+1), size-(y+1))]:
                         self.weight_grid[i][j] = weights[8]
                     
-        # midpoint
+        # set up squares around midpoint
         for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
                      (midpoint, midpoint-1), (midpoint, midpoint)]:
             self.weight_grid[i][j] = weights[9]
+
+
+    # create simple weighted square heuristic for boards smaller than 7x7
+    def setup_weight_grid_simple(self, weights, midpoint):
+        size = self.size # for readability
+
+        # see previous function for weight grid structure explanation
+        # set in order of danger squares, then corners, then centre
+        # so that accuracy is preserved where it is most important
+
+        for i, j in [(1, 2), (1, size-3), (2, 1), (2, size-2),
+                     (size-3, 1), (size-3, size-2), (size-2, 2), (size-2, size-3)]:
+                self.weight_grid[i][j] = int(weights[1])
+
+        for i, j in [(2, 2), (2, size-3), (size-3, 2), (size-3, size-3)]:
+            self.weight_grid[i][j] = int(weights[2])
+
+        for i, j in [(1, 1), (1, size-2), (size-2, 1), (size-2, size-2)]:
+                self.weight_grid[i][j] = int(weights[0])
+
+        for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
+                     (midpoint, midpoint-1), (midpoint, midpoint)]:
+                self.weight_grid[i][j] = int(weights[9])
 
 
     # reset board and values
