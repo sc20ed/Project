@@ -3,7 +3,7 @@ from othello.board import Board
 
 
 # test that the board is set up correctly
-class TestSetup(unittest.TestCase):
+class TestSetupBoard(unittest.TestCase):
     def test_setup_8(self):
         board = Board(8)
 

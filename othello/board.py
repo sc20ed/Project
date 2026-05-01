@@ -16,18 +16,8 @@ class Board:
         self.whose_turn = 1
         self.square_difference = 0
         self.wg_score = 0
-
-        for i in range(self.size):
-            row = []
-            for j in range(self.size):
-                row.append(0)
-            self.board.append(row)
-
-        for i in range(self.size):
-            row = []
-            for j in range(self.size):
-                row.append(0)
-            self.weight_grid.append(row)
+        self.mobility = [0, 0]
+        self.p_mobility = [0, 0]
 
         midpoint = int(self.size/2)
         self.setup(midpoint)
@@ -37,6 +27,7 @@ class Board:
             next(wl)
             weights = [int(weight) for weight in wl.readline().strip('\n').split(',')]
         
+        self.init_weight_grid()
         if self.size > 6:
             self.setup_weight_grid(weights, midpoint)
         else:
@@ -45,12 +36,27 @@ class Board:
 
     # create initial game position
     def setup(self, midpoint):
+        for i in range(self.size):
+            row = []
+            for j in range(self.size):
+                row.append(0)
+            self.board.append(row)
+
         for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
                      (midpoint, midpoint-1), (midpoint, midpoint)]:
             if i == j:
                 self.board[i][j] = 1
             else:
                 self.board[i][j] = -1
+
+    
+    # initialise weighted squares grid to correct size
+    def init_weight_grid(self):
+        for i in range(self.size):
+            row = []
+            for j in range(self.size):
+                row.append(0)
+            self.weight_grid.append(row)
 
 
     # create weighted squares grid for current board
@@ -150,16 +156,15 @@ class Board:
 
     # reset board and values
     def reset(self):
+        self.board = []
         self.unmake_list = []
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
         self.square_difference = 0
         self.wg_score = 0
-
-        for j in range(1, self.size-1):
-            for i in range(1, self.size-1):
-                self.board[i][j] = 0
+        self.mobility = [0, 0]
+        self.p_mobility = [0, 0]
 
         self.setup()
 
