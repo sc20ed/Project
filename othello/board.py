@@ -18,24 +18,25 @@ class Board:
         self.wg_score = 0
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
+        self.weights = []
 
         midpoint = int(self.size/2)
-        self.setup(midpoint)
+        self.setup_board(midpoint)
 
-        # move later?
+        # get weights for heuristics. move later?
         with open(file="weight_list.txt", mode='r', encoding="utf-8") as wl:
             next(wl)
-            weights = [int(weight) for weight in wl.readline().strip('\n').split(',')]
+            self.weights = [int(weight) for weight in wl.readline().strip('\n').split(',')]
         
         self.init_weight_grid()
         if self.size > 6:
-            self.setup_weight_grid(weights, midpoint)
+            self.setup_weight_grid(self.weights, midpoint)
         else:
-            self.setup_weight_grid_simple(weights, midpoint)
+            self.setup_weight_grid_simple(self.weights, midpoint)
     
 
     # create initial game position
-    def setup(self, midpoint):
+    def setup_board(self, midpoint):
         for i in range(self.size):
             row = []
             for j in range(self.size):
@@ -166,7 +167,8 @@ class Board:
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
 
-        self.setup()
+        midpoint = int(self.size/2)
+        self.setup_board(midpoint)
 
 
     # print board to terminal
@@ -216,22 +218,35 @@ class Board:
         self.whose_turn *= -1
 
 
-    # find frontier by checking the entire board
+    # find frontier by checking the entire board, and update p_mobility
     def find_frontier(self, opponent):
         frontier = []
+        p_index = (self.whose_turn+2)%3
+        self.p_mobility[p_index] = 0
 
+        # adds a square to the frontier if it is adjacent to an opponents disc,
+        # then increments p_mobility if the square is not only adjacent to an edge disc
         for i in range(1, self.size-1):
             for j in range(1, self.size-1):
                 if self.board[i][j] == 0:
-                    if (self.board[i][j+1] == opponent or
-                        self.board[i][j-1] == opponent or
-                        self.board[i+1][j] == opponent or
-                        self.board[i-1][j] == opponent or
-                        self.board[i+1][j+1] == opponent or
-                        self.board[i+1][j-1] == opponent or
-                        self.board[i-1][j+1] == opponent or
-                        self.board[i-1][j-1] == opponent):
-                        frontier.append((i, j))
+                    solely_from_edge = True
+
+                    for x, y in [(i, j+1), (i,j-1), (i+1, j), (i-1, j),
+                                 (i+1, j+1), (i+1, j-1), (i-1, j+1), (i-1, j-1)]:
+                        if self.board[x][y] == opponent:
+                            frontier.append((i, j))
+
+                            if i not in [2,7] and j not in [2, 7]:
+                                solely_from_edge = False
+                                break
+
+                            else:
+                                if x not in [1, 8] and y not in [1, 8]:
+                                    solely_from_edge = False
+                                    break
+
+                    if not solely_from_edge:
+                        self.p_mobility[p_index] += self.whose_turn
 
         return frontier
     
@@ -459,7 +474,7 @@ class Board:
                 turn_change.append(square)
                 self.board[square[0]][square[1]] = player
                 self.square_difference += (player*2)
-                self.wg_score += self.weight_grid[move[0]][move[1]] * player
+                self.wg_score += self.weight_grid[move[0]][move[1]] * player            
 
         self.unmake_list.append(turn_change)
 
@@ -488,7 +503,8 @@ class Board:
 
     # evaluation function
     def heuristics(self):
-        score = (self.square_difference +
-                (self.wg_score/50))
+        score = int((self.square_difference +
+                     (self.wg_score/50) +
+                     sum(self.p_mobility)))
 
         return score
