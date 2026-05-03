@@ -481,6 +481,21 @@ class Board:
         self.unmake_list.append(turn_change)
 
 
+    # calculate the stability heuristic
+    def stability(self):
+        pass
+
+
+    # evaluation function
+    def heuristics(self):
+        score = int(self.square_difference +
+                     (self.wg_score/50) +
+                     sum(self.p_mobility) +
+                     sum(self.mobility))
+
+        return score
+
+
     # end game and determine winner and score
     def game_over(self):
         p1_total = 0
@@ -501,13 +516,3 @@ class Board:
             winner = 0
 
         return winner, (p1_total, p2_total)
-        
-
-    # evaluation function
-    def heuristics(self):
-        score = int(self.square_difference +
-                     (self.wg_score/50) +
-                     sum(self.p_mobility) +
-                     sum(self.mobility))
-
-        return score
