@@ -27,7 +27,7 @@ def turn(board, p_type):
 
     elif p_type == 2:
         maximising = bool(player+1)
-        move, score = alpha_beta(board, 5, maximising)
+        move, score = alpha_beta(board, 4, maximising)
         log.debug("Alpha-beta search selected move %s with score %d", move, score)
 
     elif p_type == 3:
@@ -86,6 +86,7 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
         p1_pass = turn(board, p1_type)
         board.display()
         print("")
+        
         if board.move_count >= board.max_moves:
             log.debug("Board full, game complete")
             break
@@ -94,6 +95,7 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
         p2_pass = turn(board, p2_type)
         board.display()
         print("")
+
         if board.move_count >= board.max_moves:
             log.debug("Board full, game complete")
             break

@@ -1,3 +1,4 @@
+from collections import deque
 import logging
 
 log = logging.getLogger("board.py")
@@ -18,6 +19,7 @@ class Board:
         self.wg_score = 0
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
+        self.stability = 0
         self.weights = []
 
         midpoint = int(self.size/2)
@@ -180,6 +182,7 @@ class Board:
         self.wg_score = 0
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
+        self.stability = 0
 
         midpoint = int(self.size/2)
         self.setup_board(midpoint)
@@ -505,11 +508,48 @@ class Board:
         self.unmake_list.append(turn_change)
 
 
+    # update stability from discs around current position
+    def find_stable_group(self, checked, player, p_stability, square):
+
+        # for each adjacent player square check if it has at least one stable neighour
+        # on each of the possible directions that it could be attacked
+
+        # check if queued squares are stable and add adjacent squares to queue
+        adj_queue = deque()
+        adj_queue.append(square)
+        checked[square[0]][square[1]] = True
+        while adj_queue:
+            i, j = adj_queue.popleft()
+
+            # check if square is stable
+            opposite_adj_pairs = [((i, j+1), (i,j-1)), ((i+1, j), (i-1, j)),
+                           ((i+1, j+1), (i-1, j-1)), ((i-1, j+1), (i+1, j-1))]
+            vuln_directions = 4
+            for a, b in opposite_adj_pairs:
+                if p_stability[a[0]][a[1]] or p_stability[b[0]][b[1]]:
+                    vuln_directions -= 1
+
+                if not vuln_directions:
+                    p_stability[i][j] = True
+                    self.stability += player
+
+                    # if stable, queue adjacent squares
+                    for a, b in opposite_adj_pairs[:2]:
+                        if not checked[a[0]][a[1]] and self.board[a[0]][a[1]] == player:
+                            checked[a[0]][a[1]] = True
+                            adj_queue.append((a[0], a[1]))
+                        elif not checked[b[0]][b[1]] and self.board[b[0]][b[1]] == player:
+                            checked[b[0]][b[1]] = True
+                            adj_queue.append((b[0], b[1]))
+
+
     # calculate the stability heuristic
-    def stability(self):
-        pass
-        '''
+    def update_stability(self):
+        self.stability = 0
+        p1_stability = []
+        p2_stability = []
         checked = []
+
         for i in range(self.size):
             row = []
             for j in range(self.size):
@@ -518,19 +558,28 @@ class Board:
                 else:
                     row.append(False)
             checked.append(row)
+            p1_stability.append(row)
+            p2_stability.append(row)
 
+        # start from each corner and update stability for the occupying player
         for i, j in [(1, 1), (1, self.size-2), (self.size-2, 1), (self.size-2, self.size-2)]:
-                if self.board[i][j] != 0:
-        '''
-
+                if self.board[i][j] != 0 and not checked[i][j]:
+                    player = self.board[i][j]
+                    
+                    if player == 1:
+                        self.find_stable_group(checked, player, p1_stability, (i, j))
+                    else:
+                        self.find_stable_group(checked, player, p2_stability, (i, j))
 
 
     # evaluation function
     def heuristics(self):
+        self.update_stability()
         score = int(self.square_difference +
                      (self.wg_score/50) +
                      sum(self.p_mobility) +
-                     sum(self.mobility))
+                     sum(self.mobility)+
+                     self.stability)
 
         return score
 
