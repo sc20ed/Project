@@ -337,15 +337,17 @@ class Board:
         return False
 
     
-    # check what legal moves are available
+    # check what legal moves are available and update mobility
     def find_moves(self, player, opponent):
-
         frontier = self.find_frontier(opponent)
         moves = []
         
         for square in frontier:
             if (self.validate_move(player, opponent, square)):
                 moves.append(square)
+
+        p_index = (self.whose_turn+2)%3
+        self.mobility[p_index] = len(moves)   
 
         return moves
 
@@ -503,8 +505,9 @@ class Board:
 
     # evaluation function
     def heuristics(self):
-        score = int((self.square_difference +
+        score = int(self.square_difference +
                      (self.wg_score/50) +
-                     sum(self.p_mobility)))
+                     sum(self.p_mobility) +
+                     sum(self.mobility))
 
         return score
