@@ -155,6 +155,20 @@ class Board:
                 self.weight_grid[i][j] = int(weights[9])
 
 
+    # if corner has been captured update weight grid adjacent to corner    
+    def weight_grid_corner_change(self, move):
+        wg_change = []
+        for i, j in [(1, 1), (1, self.size-2), (self.size-2, 1), (self.size-2, self.size-2)]:
+            if (i, j) == move:
+                for x, y in [(i, j+1), (i,j-1), (i+1, j), (i-1, j),
+                             (i+1, j+1), (i+1, j-1), (i-1, j+1), (i-1, j-1)]:
+                    if self.weight_grid[x][y] != 0:
+                        self.weight_grid[x][y] = self.weights[3]
+                        wg_change.append((x, y))
+
+        return wg_change
+
+
     # reset board and values
     def reset(self):
         self.board = []
@@ -186,6 +200,7 @@ class Board:
                     log.error("Invalid board character %s at [%d][%d]", str(self.board[i][j]), i, j)
             print("")
 
+
     # update turn count and current player
     def advance_turn(self, passed):
         if not passed:
@@ -208,6 +223,14 @@ class Board:
         
         self.square_difference = prev_turn.pop(0)
         self.wg_score = prev_turn.pop(0)
+        wg_change = prev_turn.pop(0)
+        if wg_change:
+            for i, j in wg_change:
+                if i == j:
+                    self.weight_grid[i][j] == self.weights[2]
+                else:
+                    self.weight_grid[i][j] == self.weights[1]
+
         prev_move = prev_turn.pop(0)
         self.board[prev_move[0]][prev_move[1]] = 0
 
@@ -465,7 +488,8 @@ class Board:
 
     # flip squares captured by chosen move, update heuristics and record changes for unmake list
     def flip(self, player, move, squares):
-        turn_change = [self.square_difference, self.wg_score, move]
+        wg_change = self.weight_grid_corner_change(move)
+        turn_change = [self.square_difference, self.wg_score, wg_change, move]
 
         self.board[move[0]][move[1]] = player
         self.square_difference += player
@@ -476,7 +500,7 @@ class Board:
                 turn_change.append(square)
                 self.board[square[0]][square[1]] = player
                 self.square_difference += (player*2)
-                self.wg_score += self.weight_grid[move[0]][move[1]] * player            
+                self.wg_score += self.weight_grid[move[0]][move[1]] * player                  
 
         self.unmake_list.append(turn_change)
 
@@ -484,6 +508,21 @@ class Board:
     # calculate the stability heuristic
     def stability(self):
         pass
+        '''
+        checked = []
+        for i in range(self.size):
+            row = []
+            for j in range(self.size):
+                if i == 0 or j == 0 or i == self.size-1 or j == self.size-1:
+                    row.append(True)
+                else:
+                    row.append(False)
+            checked.append(row)
+
+        for i, j in [(1, 1), (1, self.size-2), (self.size-2, 1), (self.size-2, self.size-2)]:
+                if self.board[i][j] != 0:
+        '''
+
 
 
     # evaluation function
