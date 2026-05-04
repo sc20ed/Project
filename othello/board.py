@@ -626,11 +626,15 @@ class Board:
     # evaluation function
     def heuristics(self):
         self.update_stability()
-        score = int(self.disc_difference +
-                     (self.wg_score/20) +
-                     sum(self.mobility) +
-                     sum(self.p_mobility)+
-                     self.stability)
+
+        # compute heuristic scores from weights
+        w_disc = self.disc_difference * self.weights[10]
+        w_wg = (self.wg_score/20) # the grid values are the weights, /20 is normalization
+        w_mob = sum(self.mobility) * self.weights[11]
+        w_pmob = sum(self.p_mobility) * self.weights[12]
+        w_stab = self.stability * self.weights[13]
+
+        score = int(w_disc + w_wg + w_mob + w_pmob + w_stab)
 
         return score
 
