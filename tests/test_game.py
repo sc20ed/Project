@@ -159,6 +159,18 @@ class TestGame(unittest.TestCase):
         self.assertEqual(winner, 0)
         self.assertEqual(score, (2, 2))
 
+    
+    def test_endgame_search(self): #TBC
+        pass
+    
+        with self.assertLogs("game.py", 10) as logs:
+            with contextlib.redirect_stdout(None):
+                winner, score = run_game(2, 0, 0)
+        ex_log = "DEBUG:game.py:Board full, game complete"
+        self.assertIn(ex_log, logs.output)      
+        self.assertEqual(winner, 0)
+        self.assertEqual(score, (2, 2))
+
 
 if __name__ == "__main__":
     unittest.main()

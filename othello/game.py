@@ -22,12 +22,12 @@ def turn(board, p_type, depth, endgame):
     elif p_type == 1:
         maximising = bool(player+1)
         move, score = minimax(board, depth, maximising, endgame)
-        log.debug("Minimax search selected move %s with score %d", move, score)
+        log.debug("Minimax search with depth %s selected move %s with score %d", depth, move, score)
 
     elif p_type == 2:
         maximising = bool(player+1)
         move, score = alpha_beta(board, depth, maximising, endgame)
-        log.debug("Alpha-beta search selected move %s with score %d", move, score)
+        log.debug("Alpha-beta search with depth %s selected move %s with score %d", depth, move, score)
 
     elif p_type == 3:
         # player move selection for testing
@@ -66,15 +66,24 @@ def turn(board, p_type, depth, endgame):
             log.debug("Changed corresponding weight grid corner values")
     
         score = board.heuristics()
+        wg_factor = 0.02
+        w_disc = board.disc_difference * board.weights[10]
+        w_wg = board.wg_score * wg_factor # the grid values themselves are the weights, /20 is normalization
+        w_mob = sum(board.mobility) * board.weights[11]
+        w_pmob = sum(board.p_mobility) * board.weights[12]
+        w_stab = board.stability * board.weights[13]
+
         log.debug("Heuristics for this turn:\n" +
-              "\t\t\t\t\t\t\t\t\td_diff   | %d\n" +
-              "\t\t\t\t\t\t\t\t\twg_score | %d (/20)\n" +
-              "\t\t\t\t\t\t\t\t\tmob      | %d - %d\n" +
-              "\t\t\t\t\t\t\t\t\tp_mob    | %d - %d\n" +
-              "\t\t\t\t\t\t\t\t\tstab     | %d\n" +
-              "\t\t\t\t\t\t\t\t\ttotal    | %d", board.disc_difference,
-              board.wg_score, board.mobility[0], board.mobility[1],
-              board.p_mobility[0], board.p_mobility[1], board.stability,score)
+              "\t\t\t\t\t\t\t\t\t         |  score\t  weight\ttotal\n"
+              "\t\t\t\t\t\t\t\t\td_diff   | % -8d * % -3.2f    = % -.2f \n" +
+              "\t\t\t\t\t\t\t\t\twg_score | % -8d * % -3.2f    = % -.2f\n" +
+              "\t\t\t\t\t\t\t\t\tmob      | % -3d - %-3d* % -3.2f    = % -.2f\n" +
+              "\t\t\t\t\t\t\t\t\tp_mob    | % -3d - %-3d* % -3.2f    = % -.2f\n" +
+              "\t\t\t\t\t\t\t\t\tstab     | % -8d * % -3.2f    = % -.2f\n" +
+              "\t\t\t\t\t\t\t\t\ttotal    | % -d", board.disc_difference, board.weights[10], w_disc,
+              board.wg_score, wg_factor, w_wg, board.mobility[0], -board.mobility[1], board.weights[11], w_mob,
+              board.p_mobility[0], -board.p_mobility[1], board.weights[12], w_pmob, board.stability,
+              board.weights[13], w_stab, score)
     
     return passed
 

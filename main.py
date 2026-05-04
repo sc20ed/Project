@@ -38,7 +38,7 @@ def main():
         # cpu vs cpu
         if option == 1:
             log.info("Starting CPU vs CPU game")
-            winner, score = run_game(8, 0, 0, 2, 4, 0)
+            winner, score = run_game(8, 0, 0, 0, 4, 0)
             if winner == 0:
                 print(f"DRAW")
                 log.info("Draw with score %s", score)

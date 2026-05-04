@@ -642,5 +642,52 @@ class TestGameOver(unittest.TestCase):
         self.assertEqual(score, (64, 0))
 
 
+# test that heuristics function correctly
+class TestHeuristics(unittest.TestCase):
+    def setUp(self):
+        self.board = Board(8)
+        moves = [(3, 5), (5, 6), (6, 3), (2, 5)]
+        player = self.board.whose_turn
+        opponent = player * -1
+
+        for move in moves:
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+
+    def test_disc_diff(self):
+        pass
+
+
+    def test_mob(self):
+        pass
+    
+
+    def test_p_mob(self):
+        pass
+
+    
+    def test_wg_setup(self):
+        pass
+
+
+    def test_wg_score(self):
+        pass
+
+
+    def test_retract_heuristics(self):
+        pass
+    
+
+    def test_wg_corner_change(self):
+        pass
+
+
+    def test_retract_wg_corner_change(self):
+        pass
+
+
 if __name__ == "__main__":
     unittest.main()

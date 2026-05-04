@@ -629,7 +629,7 @@ class Board:
 
         # compute heuristic scores from weights
         w_disc = self.disc_difference * self.weights[10]
-        w_wg = (self.wg_score/20) # the grid values are the weights, /20 is normalization
+        w_wg = self.wg_score/50 # the grid values themselves are the weights, /50 is normalization
         w_mob = sum(self.mobility) * self.weights[11]
         w_pmob = sum(self.p_mobility) * self.weights[12]
         w_stab = self.stability * self.weights[13]
