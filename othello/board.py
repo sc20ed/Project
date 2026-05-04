@@ -15,7 +15,7 @@ class Board:
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
-        self.square_difference = 0
+        self.disc_difference = 0
         self.wg_score = 0
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
@@ -160,13 +160,61 @@ class Board:
     # if corner has been captured update weight grid adjacent to corner    
     def weight_grid_corner_change(self, move):
         wg_change = []
-        for i, j in [(1, 1), (1, self.size-2), (self.size-2, 1), (self.size-2, self.size-2)]:
-            if (i, j) == move:
-                for x, y in [(i, j+1), (i,j-1), (i+1, j), (i-1, j),
-                             (i+1, j+1), (i+1, j-1), (i-1, j+1), (i-1, j-1)]:
-                    if self.weight_grid[x][y] != 0:
-                        self.weight_grid[x][y] = self.weights[3]
-                        wg_change.append((x, y))
+        
+        # updates the 3 weights adjacent to the given corner directly
+        # and corrects the weighted squares heuristic accordingly
+        # it is faster and simpler to do this with if statements
+        if move == (1, 1):
+            for i, j in [(1, 2), (2, 1), (2, 2)]:
+                s_player =  self.board[i][j]
+                self.wg_score -= self.weight_grid[i][j] * s_player
+                wg_change.append((i, j))
+
+                if (i, j) == (2, 2):
+                    self.weight_grid[i][j] = self.weights[3]
+                    self.wg_score += self.weight_grid[i][j] * s_player
+                else:
+                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.wg_score += self.weight_grid[i][j] * s_player
+
+        elif move == (1, self.size-2):
+            for i, j in [(1, self.size-3), (2, self.size-3), (2, self.size-2)]:
+                s_player =  self.board[i][j]
+                self.wg_score -= self.weight_grid[i][j] * s_player
+                wg_change.append((i, j))
+
+                if (i, j) == (2, self.size-3):
+                    self.weight_grid[i][j] = self.weights[3]
+                    self.wg_score += self.weight_grid[i][j] * s_player
+                else:
+                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.wg_score += self.weight_grid[i][j] * s_player
+
+        elif move == (self.size-2, 1):
+            for i, j in [(self.size-3, 1), (self.size-3, 2), (self.size-2, 2)]:
+                s_player =  self.board[i][j]
+                self.wg_score -= self.weight_grid[i][j] * s_player
+                wg_change.append((i, j))
+
+                if (i, j) == (self.size-3, 2):
+                    self.weight_grid[i][j] = self.weights[3]
+                    self.wg_score += self.weight_grid[i][j] * s_player
+                else:
+                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.wg_score += self.weight_grid[i][j] * s_player
+
+        elif move == (self.size-2, self.size-2):
+            for i, j in [(self.size-3, self.size-3), (self.size-3, self.size-2), (self.size-2, self.size-3)]:
+                s_player =  self.board[i][j]
+                self.wg_score -= self.weight_grid[i][j] * s_player
+                wg_change.append((i, j))
+
+                if (i, j) == (self.size-3, self.size-3):
+                    self.weight_grid[i][j] = self.weights[3]
+                    self.wg_score += self.weight_grid[i][j] * s_player
+                else:
+                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.wg_score += self.weight_grid[i][j] * s_player
 
         return wg_change
 
@@ -178,7 +226,7 @@ class Board:
         self.move_count = 0
         self.turn_count = 0
         self.whose_turn = 1
-        self.square_difference = 0
+        self.disc_difference = 0
         self.wg_score = 0
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
@@ -188,7 +236,7 @@ class Board:
         self.setup_board(midpoint)
 
 
-    # print board to terminal
+    # print board to terminal flipped to traditional orientation
     def display(self):
         for j in range(1, self.size-1):
             for i in range(1, self.size-1):
@@ -209,7 +257,7 @@ class Board:
         if not passed:
             self.move_count += 1
         else:
-            self.unmake_list.append([self.square_difference, -1])
+            self.unmake_list.append([self.disc_difference, 'p'])
 
         self.turn_count += 1
         self.whose_turn *= -1
@@ -220,19 +268,19 @@ class Board:
         prev_turn = self.unmake_list.pop()
         self.turn_count -= 1
 
-        if prev_turn[1] == -1:
+        if prev_turn[1] == 'p':
             self.whose_turn *= -1
             return
         
-        self.square_difference = prev_turn.pop(0)
+        self.disc_difference = prev_turn.pop(0)
         self.wg_score = prev_turn.pop(0)
         wg_change = prev_turn.pop(0)
         if wg_change:
             for i, j in wg_change:
-                if i == j:
-                    self.weight_grid[i][j] == self.weights[2]
+                if (i, j) in [(2, 2), (2, self.size-3), (self.size-3, 2), (self.size-3, self.size-3)]:
+                    self.weight_grid[i][j] = self.weights[2]
                 else:
-                    self.weight_grid[i][j] == self.weights[1]
+                    self.weight_grid[i][j] = self.weights[1]
 
         prev_move = prev_turn.pop(0)
         self.board[prev_move[0]][prev_move[1]] = 0
@@ -372,8 +420,8 @@ class Board:
             if (self.validate_move(player, opponent, square)):
                 moves.append(square)
 
-        p_index = (self.whose_turn+2)%3
-        self.mobility[p_index] = len(moves)   
+        p_index = (player+2)%3
+        self.mobility[p_index] = len(moves) * player
 
         return moves
 
@@ -491,19 +539,24 @@ class Board:
 
     # flip squares captured by chosen move, update heuristics and record changes for unmake list
     def flip(self, player, move, squares):
+        turn_change = [self.disc_difference, self.wg_score]
         wg_change = self.weight_grid_corner_change(move)
-        turn_change = [self.square_difference, self.wg_score, wg_change, move]
+        turn_change.append(wg_change)
+        turn_change.append(move)
 
         self.board[move[0]][move[1]] = player
-        self.square_difference += player
+        self.disc_difference += player
         self.wg_score += self.weight_grid[move[0]][move[1]] * player
 
         for line in squares:
             for square in line:
                 turn_change.append(square)
                 self.board[square[0]][square[1]] = player
-                self.square_difference += (player*2)
-                self.wg_score += self.weight_grid[move[0]][move[1]] * player                  
+                self.disc_difference += (player*2)
+                if square in wg_change: # calculated in wgcc by necessity
+                    continue
+                self.wg_score += self.weight_grid[square[0]][square[1]] * (player*2)
+
 
         self.unmake_list.append(turn_change)
 
@@ -564,21 +617,19 @@ class Board:
         # start from each corner and update stability for the occupying player
         for i, j in [(1, 1), (1, self.size-2), (self.size-2, 1), (self.size-2, self.size-2)]:
                 if self.board[i][j] != 0 and not checked[i][j]:
-                    player = self.board[i][j]
-                    
-                    if player == 1:
-                        self.find_stable_group(checked, player, p1_stability, (i, j))
+                    if self.board[i][j] == 1:
+                        self.find_stable_group(checked, 1, p1_stability, (i, j))
                     else:
-                        self.find_stable_group(checked, player, p2_stability, (i, j))
+                        self.find_stable_group(checked, -1, p2_stability, (i, j))
 
 
     # evaluation function
     def heuristics(self):
         self.update_stability()
-        score = int(self.square_difference +
-                     (self.wg_score/50) +
-                     sum(self.p_mobility) +
-                     sum(self.mobility)+
+        score = int(self.disc_difference +
+                     (self.wg_score/20) +
+                     sum(self.mobility) +
+                     sum(self.p_mobility)+
                      self.stability)
 
         return score

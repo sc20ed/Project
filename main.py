@@ -5,7 +5,7 @@ import logging
 log = logging.getLogger("main.py")
 logging.basicConfig(filename="othello/log.txt", filemode='w',
                     format="%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s",
-                    datefmt="%m/%d/%Y %I:%M:%S %p", encoding="utf-8", level=logging.INFO)
+                    datefmt="%m/%d/%Y %I:%M:%S %p", encoding="utf-8", level=logging.DEBUG)
 
 # prompt user to change the logging level
 def set_logging_level():
@@ -38,7 +38,7 @@ def main():
         # cpu vs cpu
         if option == 1:
             log.info("Starting CPU vs CPU game")
-            winner, score = run_game(8, 0, 2, 0)
+            winner, score = run_game(8, 0, 0, 2, 4, 0)
             if winner == 0:
                 print(f"DRAW")
                 log.info("Draw with score %s", score)
@@ -50,7 +50,7 @@ def main():
         # player vs cpu
         elif option == 2:
             log.info("Starting Player vs CPU game")
-            winner, score = run_game(8, 3, 2, 0)
+            winner, score = run_game(8, 3, 0, 2, 4, 0)
             if winner == 0:
                 print(f"DRAW")
                 log.info("Draw with score %s", score)

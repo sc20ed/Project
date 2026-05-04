@@ -7,11 +7,10 @@ log = logging.getLogger("game.py")
 
 
 # game turn 
-def turn(board, p_type):
+def turn(board, p_type, depth, endgame):
     player = board.whose_turn
     opponent = player * -1
     move = None
-
 
     # select move with current player method
     if p_type == 0:
@@ -22,12 +21,12 @@ def turn(board, p_type):
 
     elif p_type == 1:
         maximising = bool(player+1)
-        move, score = minimax(board, 4, maximising)
+        move, score = minimax(board, depth, maximising, endgame)
         log.debug("Minimax search selected move %s with score %d", move, score)
 
     elif p_type == 2:
         maximising = bool(player+1)
-        move, score = alpha_beta(board, 4, maximising)
+        move, score = alpha_beta(board, depth, maximising, endgame)
         log.debug("Alpha-beta search selected move %s with score %d", move, score)
 
     elif p_type == 3:
@@ -53,23 +52,42 @@ def turn(board, p_type):
     if move == (-1, -1) or move == None:
         board.advance_turn(1)
         log.debug("No move available, turn passed")
-        return 1
+        passed = True
     else:
         board.make_move(player, opponent, (move))
         log.debug("Made move")
         board.advance_turn(0)
-        return 0
+        passed = False
+
+    # avoid overhead if logging level is not debug
+    if log.getEffectiveLevel() <= 10:
+        if move in [(1, 1), (1, board.size-2),
+                     (board.size-2, 1), (board.size-2, board.size-2)]:
+            log.debug("Changed corresponding weight grid corner values")
+    
+        score = board.heuristics()
+        log.debug("Heuristics for this turn:\n" +
+              "\t\t\t\t\t\t\t\t\td_diff   | %d\n" +
+              "\t\t\t\t\t\t\t\t\twg_score | %d (/20)\n" +
+              "\t\t\t\t\t\t\t\t\tmob      | %d - %d\n" +
+              "\t\t\t\t\t\t\t\t\tp_mob    | %d - %d\n" +
+              "\t\t\t\t\t\t\t\t\tstab     | %d\n" +
+              "\t\t\t\t\t\t\t\t\ttotal    | %d", board.disc_difference,
+              board.wg_score, board.mobility[0], board.mobility[1],
+              board.p_mobility[0], board.p_mobility[1], board.stability,score)
+    
+    return passed
 
 
 # run game based on arguments
 # p_type arguments represent the method used for move selection
-def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
+def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_moves=0):
 
     # initialise board a with set number of random moves
     board = Board(size)
     if n_random_moves > 0:
         for i in range(n_random_moves):
-            turn(board, 0)
+            turn(board, 0, 0, False)
         log.debug("Set up board with %s random moves", n_random_moves)
         board.display()
         print("")
@@ -81,9 +99,17 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
 
     # main game loop
     active = 1
+    endgame = False
     while active == 1:
-        log.debug("Player 1 turn")
-        p1_pass = turn(board, p1_type)
+        if board.move_count >= board.max_moves - 10:
+            endgame = True
+            moves_remaining = board.max_moves - board.move_count
+            p1_depth = moves_remaining
+            p2_depth = moves_remaining
+
+        log.debug("Player 1, turn %s", board.turn_count+1)
+        p1_pass = turn(board, p1_type, p1_depth, endgame)
+        print(board.turn_count)
         board.display()
         print("")
         
@@ -91,8 +117,9 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
             log.debug("Board full, game complete")
             break
 
-        log.debug("Player 2 turn")
-        p2_pass = turn(board, p2_type)
+        log.debug("Player 2 turn %s", board.turn_count+1)
+        p2_pass = turn(board, p2_type, p2_depth, endgame)
+        print(board.turn_count)
         board.display()
         print("")
 
@@ -100,7 +127,7 @@ def run_game(size=8, p1_type=0, p2_type=0, n_random_moves=0):
             log.debug("Board full, game complete")
             break
         
-        if p1_pass == 1 and p2_pass == 1:
+        if p1_pass and p2_pass:
             log.debug("Neither player can  move, game complete")
             active = 0
 
