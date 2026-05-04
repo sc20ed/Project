@@ -7,7 +7,7 @@ log = logging.getLogger("game.py")
 
 
 # game turn 
-def turn(board, p_type, depth, endgame):
+def turn(board, p_type, depth=4, endgame=False):
     player = board.whose_turn
     opponent = player * -1
     move = None
@@ -84,6 +84,9 @@ def turn(board, p_type, depth, endgame):
               board.wg_score, wg_factor, w_wg, board.mobility[0], -board.mobility[1], board.weights[11], w_mob,
               board.p_mobility[0], -board.p_mobility[1], board.weights[12], w_pmob, board.stability,
               board.weights[13], w_stab, score)
+        
+        if endgame:
+            log.debug("Endgame search, only final disc_diff considered")
     
     return passed
 
@@ -126,7 +129,7 @@ def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_move
             log.debug("Board full, game complete")
             break
 
-        log.debug("Player 2 turn %s", board.turn_count+1)
+        log.debug("Player 2, turn %s", board.turn_count+1)
         p2_pass = turn(board, p2_type, p2_depth, endgame)
         print(board.turn_count)
         board.display()
