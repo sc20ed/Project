@@ -708,7 +708,7 @@ class TestHeuristics(unittest.TestCase):
 
     
     def test_weight_grid_setup(self):
-        w = self.board.weights
+        w = self.board.grid_weights
         ex_weight_grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, w[0], w[1], w[3], w[6], w[6], w[3], w[1], w[0], 0],
                           [0, w[1], w[2], w[4], w[7], w[7], w[4], w[2], w[1], 0],
@@ -725,11 +725,11 @@ class TestHeuristics(unittest.TestCase):
 
     def test_weight_grid_setup_16(self):
         board = Board(16)
-        ex_weight_1 = board.weights[5]
-        ex_weight_2 = board.weights[6]
-        ex_weight_3 = board.weights[7]
-        ex_weight_4 = board.weights[8]
-        ex_weight_5 = board.weights[9]
+        ex_weight_1 = board.grid_weights[5]
+        ex_weight_2 = board.grid_weights[6]
+        ex_weight_3 = board.grid_weights[7]
+        ex_weight_4 = board.grid_weights[8]
+        ex_weight_5 = board.grid_weights[9]
 
         self.assertEqual(ex_weight_1, board.weight_grid[6][6])
         self.assertEqual(ex_weight_2, board.weight_grid[7][1])
@@ -807,7 +807,7 @@ class TestHeuristics(unittest.TestCase):
         self.board.make_move(self.board.whose_turn, self.board.whose_turn*-1, (8, 1))
         self.board.advance_turn(0)
 
-        w = self.board.weights
+        w = self.board.grid_weights
 
         self.assertEqual(self.board.weight_grid[1][1], w[0])
         self.assertEqual(self.board.weight_grid[1][2], w[1]*-1)
@@ -834,7 +834,7 @@ class TestHeuristics(unittest.TestCase):
         self.board.make_move(self.board.whose_turn, self.board.whose_turn*-1, (8, 1))
         self.board.advance_turn(0)
 
-        w = self.board.weights
+        w = self.board.grid_weights
 
         self.assertEqual(self.board.weight_grid[1][1], w[0])
         self.assertEqual(self.board.weight_grid[1][2], w[1]*-1)

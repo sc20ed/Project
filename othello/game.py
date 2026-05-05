@@ -64,13 +64,21 @@ def turn(board, p_type, depth=4, endgame=False):
         if move in [(1, 1), (1, board.size-2),
                      (board.size-2, 1), (board.size-2, board.size-2)]:
             log.debug("Changed corresponding weight grid corner values")
+
+        # set weights to correct game phase
+        if board.move_count < int(board.max_moves/4):
+            w = board.ph1_weights
+        elif board.move_count < int((board.max_moves*2)/3):
+            w = board.ph2_weights
+        else:
+            w = board.ph3_weights
     
         score = board.heuristics()
-        w_disc = board.disc_difference * board.weights[10]
-        w_wg = (board.wg_score/100) * board.weights[11] # the grid values themselves are the weights, /20 is normalization
-        w_mob = (sum(board.mobility)/2) * board.weights[12]
-        w_pmob = (sum(board.p_mobility)/2) * board.weights[13]
-        w_stab = board.stability * board.weights[14]
+        w_disc = board.disc_difference * w[0]
+        w_wg = (board.wg_score/100) * w[1] # the grid values themselves are also weights, /100 is normalization
+        w_mob = (sum(board.mobility)/2) * w[2]
+        w_pmob = (sum(board.p_mobility)/2) * w[3]
+        w_stab = board.stability * w[4]
 
         log.debug("Heuristics for this turn:\n" +
               "\t\t\t\t\t\t\t\t\t         |  score\t  weight\ttotal\n"
@@ -79,10 +87,10 @@ def turn(board, p_type, depth=4, endgame=False):
               "\t\t\t\t\t\t\t\t\tmob      | % -3d - %-3d* % -3.2f    = % -.2f\n" +
               "\t\t\t\t\t\t\t\t\tp_mob    | % -3d - %-3d* % -3.2f    = % -.2f\n" +
               "\t\t\t\t\t\t\t\t\tstab     | % -8d * % -3.2f    = % -.2f\n" +
-              "\t\t\t\t\t\t\t\t\ttotal    | % -d", board.disc_difference, board.weights[10], w_disc,
-              board.wg_score, board.weights[11], w_wg, board.mobility[0], -board.mobility[1], board.weights[12], w_mob,
-              board.p_mobility[0], -board.p_mobility[1], board.weights[13], w_pmob, board.stability,
-              board.weights[14], w_stab, score)
+              "\t\t\t\t\t\t\t\t\ttotal    | % -d", board.disc_difference, w[0], w_disc,
+              board.wg_score, w[1], w_wg, board.mobility[0], -board.mobility[1], w[2], w_mob,
+              board.p_mobility[0], -board.p_mobility[1], w[3], w_pmob, board.stability,
+              w[4], w_stab, score)
         
         if endgame:
             log.debug("Endgame search, only final disc_diff considered")

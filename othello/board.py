@@ -6,7 +6,8 @@ log = logging.getLogger("board.py")
 
 # object to handle current board, game state and heuristics
 class Board:
-    def __init__(self, size=8):
+    def __init__(self, size=8, weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                                          [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]):
         self.board = []
         self.weight_grid = []
         self.unmake_list = []
@@ -20,21 +21,19 @@ class Board:
         self.mobility = [0, 0]
         self.p_mobility = [0, 0]
         self.stability = 0
-        self.weights = []
+        self.grid_weights = weights[0]
+        self.ph1_weights = weights[1]
+        self.ph2_weights = weights[2]
+        self.ph3_weights = weights[3]
 
         midpoint = int(self.size/2)
-        self.setup_board(midpoint)
-
-        # get weights for heuristics. move later?
-        with open(file="weight_list.txt", mode='r', encoding="utf-8") as wl:
-            next(wl)
-            self.weights = [float(weight) for weight in wl.readline().strip('\n').split(',')]
+        self.setup_board(midpoint)            
         
         self.init_weight_grid()
         if self.size > 6:
-            self.setup_weight_grid(self.weights, midpoint)
+            self.setup_weight_grid(self.grid_weights, midpoint)
         else:
-            self.setup_weight_grid_simple(self.weights, midpoint)
+            self.setup_weight_grid_simple(self.grid_weights, midpoint)
     
 
     # create initial game position
@@ -63,10 +62,10 @@ class Board:
 
 
     # create weighted squares grid for current board
-    def setup_weight_grid(self, weights, midpoint):
+    def setup_weight_grid(self, grid_weights, midpoint):
         size = self.size # for readability            
 
-        # weights are laid out by index as follows:
+        # grid_weights are laid out by index as follows:
         # 0
         # 1 2
         # 3 4 5
@@ -85,12 +84,12 @@ class Board:
         for x in range(1, 4 + int((size-10)/2)):
             if x < 3:
                 if x == 1:
-                    weight_value = weights[0]
+                    weight_value = grid_weights[0]
                 elif x == 2:
-                    weight_value = weights[2]
+                    weight_value = grid_weights[2]
 
             else:
-                weight_value = weights[5]
+                weight_value = grid_weights[5]
         
             for i, j in [(x, x), (x, size-(x+1)), (size-(x+1), x), (size-(x+1), size-(x+1))]:
                 self.weight_grid[i][j] = weight_value
@@ -99,11 +98,11 @@ class Board:
         for x in range(2, 5 + int((size-10)/2)):
             if x < 4:
                 if x == 2:
-                    weight_value = weights[1]
+                    weight_value = grid_weights[1]
                 else:
-                    weight_value = weights[3]
+                    weight_value = grid_weights[3]
             else:
-                weight_value = weights[6]
+                weight_value = grid_weights[6]
 
             for i, j in [(1, x), (1, size-(x+1)), (x, 1), (x, size-2),
                      (size-(x+1), 1), (size-(x+1), size-2), (size-2, x), (size-2, size-(x+1))]:
@@ -117,25 +116,25 @@ class Board:
                                  (size-(y+1), x), (size-(y+1), size-(x+1)),
                                  (size-(x+1), y), (size-(x+1), size-(y+1))]:
                         if y == 3:
-                            self.weight_grid[i][j] = weights[4]
+                            self.weight_grid[i][j] = grid_weights[4]
                         else:
-                            self.weight_grid[i][j] = weights[7]
+                            self.weight_grid[i][j] = grid_weights[7]
 
             else:
                 for y in range(x+1, 5 + int((size-10)/2)):
                     for i, j in [(x, y), (x, size-(y+1)), (y, x), (y, size-(x+1)),
                                  (size-(y+1), x), (size-(y+1), size-(x+1)),
                                  (size-(x+1), y), (size-(x+1), size-(y+1))]:
-                        self.weight_grid[i][j] = weights[8]
+                        self.weight_grid[i][j] = grid_weights[8]
                     
         # set up squares around midpoint
         for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
                      (midpoint, midpoint-1), (midpoint, midpoint)]:
-            self.weight_grid[i][j] = weights[9]
+            self.weight_grid[i][j] = grid_weights[9]
 
 
     # create simple weighted square heuristic for boards smaller than 7x7
-    def setup_weight_grid_simple(self, weights, midpoint):
+    def setup_weight_grid_simple(self, grid_weights, midpoint):
         size = self.size # for readability
 
         # see previous function for weight grid structure explanation
@@ -144,24 +143,24 @@ class Board:
 
         for i, j in [(1, 2), (1, size-3), (2, 1), (2, size-2),
                      (size-3, 1), (size-3, size-2), (size-2, 2), (size-2, size-3)]:
-                self.weight_grid[i][j] = int(weights[1])
+                self.weight_grid[i][j] = grid_weights[1]
 
         for i, j in [(2, 2), (2, size-3), (size-3, 2), (size-3, size-3)]:
-            self.weight_grid[i][j] = int(weights[2])
+            self.weight_grid[i][j] = grid_weights[2]
 
         for i, j in [(1, 1), (1, size-2), (size-2, 1), (size-2, size-2)]:
-                self.weight_grid[i][j] = int(weights[0])
+                self.weight_grid[i][j] = grid_weights[0]
 
         for i, j in [(midpoint-1, midpoint-1), (midpoint-1, midpoint),
                      (midpoint, midpoint-1), (midpoint, midpoint)]:
-                self.weight_grid[i][j] = int(weights[9])
+                self.weight_grid[i][j] = grid_weights[9]
 
 
     # if corner has been captured update weight grid adjacent to corner    
     def weight_grid_corner_change(self, move):
         wg_change = []
         
-        # updates the 3 weights adjacent to the given corner directly
+        # updates the 3 grid_weights adjacent to the given corner directly
         # and corrects the weighted squares heuristic accordingly
         # it is faster and simpler to do this with if statements
         if move == (1, 1):
@@ -171,10 +170,10 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (2, 2):
-                    self.weight_grid[i][j] = self.weights[2] / -4
+                    self.weight_grid[i][j] = self.grid_weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
-                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.weight_grid[i][j] = self.grid_weights[1] * -1
                     self.wg_score += self.weight_grid[i][j] * s_player
 
         elif move == (1, self.size-2):
@@ -184,10 +183,10 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (2, self.size-3):
-                    self.weight_grid[i][j] = self.weights[2] / -4
+                    self.weight_grid[i][j] = self.grid_weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
-                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.weight_grid[i][j] = self.grid_weights[1] * -1
                     self.wg_score += self.weight_grid[i][j] * s_player
 
         elif move == (self.size-2, 1):
@@ -197,10 +196,10 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (self.size-3, 2):
-                    self.weight_grid[i][j] = self.weights[2] / -4
+                    self.weight_grid[i][j] = self.grid_weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
-                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.weight_grid[i][j] = self.grid_weights[1] * -1
                     self.wg_score += self.weight_grid[i][j] * s_player
 
         elif move == (self.size-2, self.size-2):
@@ -210,10 +209,10 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (self.size-3, self.size-3):
-                    self.weight_grid[i][j] = self.weights[2] / -4
+                    self.weight_grid[i][j] = self.grid_weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
-                    self.weight_grid[i][j] = self.weights[1] * -1
+                    self.weight_grid[i][j] = self.grid_weights[1] * -1
                     self.wg_score += self.weight_grid[i][j] * s_player
 
         return wg_change
@@ -278,9 +277,9 @@ class Board:
         if wg_change:
             for i, j in wg_change:
                 if (i, j) in [(2, 2), (2, self.size-3), (self.size-3, 2), (self.size-3, self.size-3)]:
-                    self.weight_grid[i][j] = self.weights[2]
+                    self.weight_grid[i][j] = self.grid_weights[2]
                 else:
-                    self.weight_grid[i][j] = self.weights[1]
+                    self.weight_grid[i][j] = self.grid_weights[1]
 
         self.mobility = prev_turn.popleft()
         self.p_mobility = prev_turn.popleft()
@@ -629,12 +628,20 @@ class Board:
     def heuristics(self):
         self.update_stability()
 
+        # set weights to correct game phase
+        if self.move_count < int(self.max_moves/4):
+            w = self.ph1_weights
+        elif self.move_count < int((self.max_moves*2)/3):
+            w = self.ph2_weights
+        else:
+            w = self.ph3_weights
+
         # compute heuristic scores from weights
-        w_diff = self.disc_difference * self.weights[10]
-        w_wg = (self.wg_score/100) * self.weights[11] # the grid values themselves are also weights, /100 is normalization
-        w_mob = (sum(self.mobility)/2) * self.weights[12]
-        w_pmob = (sum(self.p_mobility)/2) * self.weights[13]
-        w_stab = self.stability * self.weights[14]
+        w_diff = self.disc_difference * w[0]
+        w_wg = (self.wg_score/100) * w[1] # the grid values themselves are also weights, /100 is normalization
+        w_mob = (sum(self.mobility)/2) * w[2]
+        w_pmob = (sum(self.p_mobility)/2) * w[3]
+        w_stab = self.stability * w[4]
 
         score = int(w_diff + w_wg + w_mob + w_pmob + w_stab)
         return score
