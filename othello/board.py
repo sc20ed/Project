@@ -28,7 +28,7 @@ class Board:
         # get weights for heuristics. move later?
         with open(file="weight_list.txt", mode='r', encoding="utf-8") as wl:
             next(wl)
-            self.weights = [int(weight) for weight in wl.readline().strip('\n').split(',')]
+            self.weights = [float(weight) for weight in wl.readline().strip('\n').split(',')]
         
         self.init_weight_grid()
         if self.size > 6:
@@ -171,7 +171,7 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (2, 2):
-                    self.weight_grid[i][j] = self.weights[3]
+                    self.weight_grid[i][j] = self.weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
                     self.weight_grid[i][j] = self.weights[1] * -1
@@ -184,7 +184,7 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (2, self.size-3):
-                    self.weight_grid[i][j] = self.weights[3]
+                    self.weight_grid[i][j] = self.weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
                     self.weight_grid[i][j] = self.weights[1] * -1
@@ -197,7 +197,7 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (self.size-3, 2):
-                    self.weight_grid[i][j] = self.weights[3]
+                    self.weight_grid[i][j] = self.weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
                     self.weight_grid[i][j] = self.weights[1] * -1
@@ -210,7 +210,7 @@ class Board:
                 wg_change.append((i, j))
 
                 if (i, j) == (self.size-3, self.size-3):
-                    self.weight_grid[i][j] = self.weights[3]
+                    self.weight_grid[i][j] = self.weights[2] / -4
                     self.wg_score += self.weight_grid[i][j] * s_player
                 else:
                     self.weight_grid[i][j] = self.weights[1] * -1
@@ -272,9 +272,9 @@ class Board:
             self.whose_turn *= -1
             return
         
-        self.disc_difference = prev_turn.pop(0)
-        self.wg_score = prev_turn.pop(0)
-        wg_change = prev_turn.pop(0)
+        self.disc_difference = prev_turn.popleft()
+        self.wg_score = prev_turn.popleft()
+        wg_change = prev_turn.popleft()
         if wg_change:
             for i, j in wg_change:
                 if (i, j) in [(2, 2), (2, self.size-3), (self.size-3, 2), (self.size-3, self.size-3)]:
@@ -282,10 +282,13 @@ class Board:
                 else:
                     self.weight_grid[i][j] = self.weights[1]
 
-        prev_move = prev_turn.pop(0)
+        self.mobility = prev_turn.popleft()
+        self.p_mobility = prev_turn.popleft()
+        prev_move = prev_turn.popleft()
         self.board[prev_move[0]][prev_move[1]] = 0
 
-        for i, j in prev_turn:
+        while prev_turn:
+            i, j = prev_turn.popleft()
             self.board[i][j] = self.whose_turn
 
         self.move_count -= 1
@@ -539,10 +542,11 @@ class Board:
 
     # flip squares captured by chosen move, update heuristics and record changes for unmake list
     def flip(self, player, move, squares):
-        turn_change = [self.disc_difference, self.wg_score]
+        turn_change = deque()
+        turn_change.extend([self.disc_difference, self.wg_score])
         wg_change = self.weight_grid_corner_change(move)
-        turn_change.append(wg_change)
-        turn_change.append(move)
+        turn_change.extend([wg_change, [self.mobility[0], self.mobility[1]],
+                            [self.p_mobility[0], self.p_mobility[1]], (move)])
 
         self.board[move[0]][move[1]] = player
         self.disc_difference += player
@@ -553,8 +557,6 @@ class Board:
                 turn_change.append(square)
                 self.board[square[0]][square[1]] = player
                 self.disc_difference += (player*2)
-                if square in wg_change: # calculated in wgcc by necessity
-                    continue
                 self.wg_score += self.weight_grid[square[0]][square[1]] * (player*2)
 
 
@@ -628,14 +630,13 @@ class Board:
         self.update_stability()
 
         # compute heuristic scores from weights
-        w_disc = self.disc_difference * self.weights[10]
-        w_wg = self.wg_score/50 # the grid values themselves are the weights, /50 is normalization
-        w_mob = sum(self.mobility) * self.weights[11]
-        w_pmob = sum(self.p_mobility) * self.weights[12]
-        w_stab = self.stability * self.weights[13]
+        w_diff = self.disc_difference * self.weights[10]
+        w_wg = (self.wg_score/100) * self.weights[11] # the grid values themselves are also weights, /100 is normalization
+        w_mob = (sum(self.mobility)/2) * self.weights[12]
+        w_pmob = (sum(self.p_mobility)/2) * self.weights[13]
+        w_stab = self.stability * self.weights[14]
 
-        score = int(w_disc + w_wg + w_mob + w_pmob + w_stab)
-
+        score = int(w_diff + w_wg + w_mob + w_pmob + w_stab)
         return score
 
 

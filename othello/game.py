@@ -66,12 +66,11 @@ def turn(board, p_type, depth=4, endgame=False):
             log.debug("Changed corresponding weight grid corner values")
     
         score = board.heuristics()
-        wg_factor = 0.02
         w_disc = board.disc_difference * board.weights[10]
-        w_wg = board.wg_score * wg_factor # the grid values themselves are the weights, /20 is normalization
-        w_mob = sum(board.mobility) * board.weights[11]
-        w_pmob = sum(board.p_mobility) * board.weights[12]
-        w_stab = board.stability * board.weights[13]
+        w_wg = (board.wg_score/100) * board.weights[11] # the grid values themselves are the weights, /20 is normalization
+        w_mob = (sum(board.mobility)/2) * board.weights[12]
+        w_pmob = (sum(board.p_mobility)/2) * board.weights[13]
+        w_stab = board.stability * board.weights[14]
 
         log.debug("Heuristics for this turn:\n" +
               "\t\t\t\t\t\t\t\t\t         |  score\t  weight\ttotal\n"
@@ -81,9 +80,9 @@ def turn(board, p_type, depth=4, endgame=False):
               "\t\t\t\t\t\t\t\t\tp_mob    | % -3d - %-3d* % -3.2f    = % -.2f\n" +
               "\t\t\t\t\t\t\t\t\tstab     | % -8d * % -3.2f    = % -.2f\n" +
               "\t\t\t\t\t\t\t\t\ttotal    | % -d", board.disc_difference, board.weights[10], w_disc,
-              board.wg_score, wg_factor, w_wg, board.mobility[0], -board.mobility[1], board.weights[11], w_mob,
-              board.p_mobility[0], -board.p_mobility[1], board.weights[12], w_pmob, board.stability,
-              board.weights[13], w_stab, score)
+              board.wg_score, board.weights[11], w_wg, board.mobility[0], -board.mobility[1], board.weights[12], w_mob,
+              board.p_mobility[0], -board.p_mobility[1], board.weights[13], w_pmob, board.stability,
+              board.weights[14], w_stab, score)
         
         if endgame:
             log.debug("Endgame search, only final disc_diff considered")
@@ -97,6 +96,8 @@ def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_move
 
     # initialise board a with set number of random moves
     board = Board(size)
+
+    # play random starting moves
     if n_random_moves > 0:
         for i in range(n_random_moves):
             turn(board, 0, 0, False)
@@ -116,11 +117,11 @@ def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_move
         if board.move_count >= board.max_moves - 10:
             endgame = True
             moves_remaining = board.max_moves - board.move_count
-            p1_depth = moves_remaining
+            #p1_depth = moves_remaining
             p2_depth = moves_remaining
 
-        log.debug("Player 1, turn %s", board.turn_count+1)
-        p1_pass = turn(board, p1_type, p1_depth, endgame)
+        log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
+        p1_pass = turn(board, p1_type, p1_depth, False)
         print(board.turn_count)
         board.display()
         print("")
@@ -129,7 +130,7 @@ def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_move
             log.debug("Board full, game complete")
             break
 
-        log.debug("Player 2, turn %s", board.turn_count+1)
+        log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
         p2_pass = turn(board, p2_type, p2_depth, endgame)
         print(board.turn_count)
         board.display()
