@@ -106,6 +106,39 @@ class TestSetupBoard(unittest.TestCase):
         self.assertEqual(board.move_count, 0)
 
 
+    def test_load_p1_weights_only(self):
+        p1 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+              [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]]
+        ex_p2 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                 [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
+
+        board = Board(8, p1)
+        self.assertEqual(board.p1_grid_weights, p1[0])
+        self.assertEqual(board.p1_weight_phases[0], p1[1])
+        self.assertEqual(board.p1_weight_phases[1], p1[2])
+        self.assertEqual(board.p1_weight_phases[2], p1[3])
+        self.assertEqual(board.p2_grid_weights, ex_p2[0])
+        self.assertEqual(board.p2_weight_phases[0], ex_p2[1])
+        self.assertEqual(board.p2_weight_phases[1], ex_p2[2])
+        self.assertEqual(board.p2_weight_phases[2], ex_p2[3])
+
+
+    def test_load_separate_weights(self):
+        p1 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+              [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]]
+        p2 = [[14, 6, -5450, 750, -5, 240, 777, 80, 20, -51],
+              [2, -1, -2, -2, -1], [1, -0.7, -2, -1, -1], [-2, -0.5, -2, -1, -3]]
+        
+        board = Board(8, p1, p2)
+        self.assertEqual(board.p1_grid_weights, p1[0])
+        self.assertEqual(board.p1_weight_phases[0], p1[1])
+        self.assertEqual(board.p1_weight_phases[1], p1[2])
+        self.assertEqual(board.p1_weight_phases[2], p1[3])
+        self.assertEqual(board.p2_grid_weights, p2[0])
+        self.assertEqual(board.p2_weight_phases[0], p2[1])
+        self.assertEqual(board.p2_weight_phases[1], p2[2])
+        self.assertEqual(board.p2_weight_phases[2], p2[3])
+
 # test that move making functions correctly
 class TestMoveMaking(unittest.TestCase):
     def setUp(self):
@@ -708,7 +741,7 @@ class TestHeuristics(unittest.TestCase):
 
     
     def test_weight_grid_setup(self):
-        w = self.board.grid_weights
+        w = self.board.p1_grid_weights
         ex_weight_grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, w[0], w[1], w[3], w[6], w[6], w[3], w[1], w[0], 0],
                           [0, w[1], w[2], w[4], w[7], w[7], w[4], w[2], w[1], 0],
@@ -720,22 +753,22 @@ class TestHeuristics(unittest.TestCase):
                           [0, w[0], w[1], w[3], w[6], w[6], w[3], w[1], w[0], 0],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
         
-        self.assertEqual(self.board.weight_grid, ex_weight_grid)
+        self.assertEqual(self.board.p1_weight_grid, ex_weight_grid)
 
 
     def test_weight_grid_setup_16(self):
         board = Board(16)
-        ex_weight_1 = board.grid_weights[5]
-        ex_weight_2 = board.grid_weights[6]
-        ex_weight_3 = board.grid_weights[7]
-        ex_weight_4 = board.grid_weights[8]
-        ex_weight_5 = board.grid_weights[9]
+        ex_weight_1 = board.p1_grid_weights[5]
+        ex_weight_2 = board.p1_grid_weights[6]
+        ex_weight_3 = board.p1_grid_weights[7]
+        ex_weight_4 = board.p1_grid_weights[8]
+        ex_weight_5 = board.p1_grid_weights[9]
 
-        self.assertEqual(ex_weight_1, board.weight_grid[6][6])
-        self.assertEqual(ex_weight_2, board.weight_grid[7][1])
-        self.assertEqual(ex_weight_3, board.weight_grid[2][8])
-        self.assertEqual(ex_weight_4, board.weight_grid[6][9])
-        self.assertEqual(ex_weight_5, board.weight_grid[8][8])
+        self.assertEqual(board.p1_weight_grid[6][6], ex_weight_1)
+        self.assertEqual(board.p1_weight_grid[7][1], ex_weight_2)
+        self.assertEqual(board.p1_weight_grid[2][8], ex_weight_3)
+        self.assertEqual(board.p1_weight_grid[6][9], ex_weight_4)
+        self.assertEqual(board.p1_weight_grid[8][8], ex_weight_5)
 
 
     def test_wg_score(self):
@@ -750,12 +783,12 @@ class TestHeuristics(unittest.TestCase):
 
         ex_wg_score = 0
         for i, j in [(4, 4), (5, 4), (6, 3)]:
-            ex_wg_score += self.board.weight_grid[i][j] * 1
+            ex_wg_score += self.board.p1_weight_grid[i][j]
 
         for i, j in [(2, 5), (3, 5), (4, 5), (5, 5), (5, 6)]:
-            ex_wg_score += self.board.weight_grid[i][j] * -1
+            ex_wg_score -= self.board.p1_weight_grid[i][j]
 
-        self.assertEqual(self.board.wg_score, ex_wg_score)
+        self.assertEqual(self.board.wg_score[0], ex_wg_score)
 
 
     def test_retract_heuristics(self):
@@ -772,11 +805,10 @@ class TestHeuristics(unittest.TestCase):
         self.board.find_moves(player, opponent)
         self.board.update_stability()
         ex_diff = self.board.disc_difference
-        ex_wg_score = self.board.wg_score
+        ex_wg_score = [self.board.wg_score[0], self.board.wg_score[1]]
         ex_mob = [self.board.mobility[0], self.board.mobility[1]]
         ex_pmob = [self.board.p_mobility[0], self.board.p_mobility[1]]
         ex_stab = self.board.stability
-        
 
         for move in self.moves[2:]:
             self.board.find_moves(player, opponent)
@@ -807,24 +839,31 @@ class TestHeuristics(unittest.TestCase):
         self.board.make_move(self.board.whose_turn, self.board.whose_turn*-1, (8, 1))
         self.board.advance_turn(0)
 
-        w = self.board.grid_weights
+        w1 = self.board.p1_grid_weights
+        w2 = self.board.p2_grid_weights
+        self.assertEqual(self.board.p1_weight_grid[1][1], w1[0])
+        self.assertEqual(self.board.p1_weight_grid[1][2], w1[1]*-1)
+        self.assertEqual(self.board.p1_weight_grid[2][1], w1[1]*-1)
+        self.assertEqual(self.board.p1_weight_grid[2][2], w1[2]/-4)
+        self.assertEqual(self.board.p2_weight_grid[1][1], w2[0])
+        self.assertEqual(self.board.p2_weight_grid[1][2], w2[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[2][1], w2[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[2][2], w2[2]/-4)
+        self.assertEqual(self.board.p1_weight_grid[7][1], w1[1]*-1)
+        self.assertEqual(self.board.p1_weight_grid[7][2], w1[2]/-4)
+        self.assertEqual(self.board.p1_weight_grid[8][1], w1[0])
+        self.assertEqual(self.board.p1_weight_grid[8][2], w1[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[7][1], w2[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[7][2], w2[2]/-4)
+        self.assertEqual(self.board.p2_weight_grid[8][1], w2[0])
+        self.assertEqual(self.board.p2_weight_grid[8][2], w2[1]*-1)
 
-        self.assertEqual(self.board.weight_grid[1][1], w[0])
-        self.assertEqual(self.board.weight_grid[1][2], w[1]*-1)
-        self.assertEqual(self.board.weight_grid[2][1], w[1]*-1)
-        self.assertEqual(self.board.weight_grid[2][2], w[2]/-4)
-
-        self.assertEqual(self.board.weight_grid[7][1], w[1]*-1)
-        self.assertEqual(self.board.weight_grid[7][2], w[2]/-4)
-        self.assertEqual(self.board.weight_grid[8][1], w[0])
-        self.assertEqual(self.board.weight_grid[8][2], w[1]*-1)
-
-        ex_wg_score = 0
-        
+        ex_wg_score = [0, 0]
         for i in range (self.board.size):
             for j in range(self.board.size):
                 if self.board.board[i][j] != 0:
-                    ex_wg_score += self.board.weight_grid[i][j] * self.board.board[i][j]
+                    ex_wg_score[0] += self.board.p1_weight_grid[i][j] * self.board.board[i][j]
+                    ex_wg_score[1] += self.board.p2_weight_grid[i][j] * self.board.board[i][j]
 
         self.assertEqual(self.board.wg_score, ex_wg_score)
 
@@ -834,40 +873,89 @@ class TestHeuristics(unittest.TestCase):
         self.board.make_move(self.board.whose_turn, self.board.whose_turn*-1, (8, 1))
         self.board.advance_turn(0)
 
-        w = self.board.grid_weights
-
-        self.assertEqual(self.board.weight_grid[1][1], w[0])
-        self.assertEqual(self.board.weight_grid[1][2], w[1]*-1)
-        self.assertEqual(self.board.weight_grid[2][1], w[1]*-1)
-        self.assertEqual(self.board.weight_grid[2][2], w[2]/-4)
-
-        self.assertEqual(self.board.weight_grid[7][1], w[1]*-1)
-        self.assertEqual(self.board.weight_grid[7][2], w[2]/-4)
-        self.assertEqual(self.board.weight_grid[8][1], w[0])
-        self.assertEqual(self.board.weight_grid[8][2], w[1]*-1)
+        w1 = self.board.p1_grid_weights
+        w2 = self.board.p2_grid_weights
+        self.assertEqual(self.board.p1_weight_grid[1][1], w1[0])
+        self.assertEqual(self.board.p1_weight_grid[1][2], w1[1]*-1)
+        self.assertEqual(self.board.p1_weight_grid[2][1], w1[1]*-1)
+        self.assertEqual(self.board.p1_weight_grid[2][2], w1[2]/-4)
+        self.assertEqual(self.board.p2_weight_grid[1][1], w2[0])
+        self.assertEqual(self.board.p2_weight_grid[1][2], w2[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[2][1], w2[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[2][2], w2[2]/-4)
+        self.assertEqual(self.board.p1_weight_grid[7][1], w1[1]*-1)
+        self.assertEqual(self.board.p1_weight_grid[7][2], w1[2]/-4)
+        self.assertEqual(self.board.p1_weight_grid[8][1], w1[0])
+        self.assertEqual(self.board.p1_weight_grid[8][2], w1[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[7][1], w2[1]*-1)
+        self.assertEqual(self.board.p2_weight_grid[7][2], w2[2]/-4)
+        self.assertEqual(self.board.p2_weight_grid[8][1], w2[0])
+        self.assertEqual(self.board.p2_weight_grid[8][2], w2[1]*-1)
 
         self.board.retract_turn()
-
-        self.assertEqual(self.board.weight_grid[7][1], w[1])
-        self.assertEqual(self.board.weight_grid[7][2], w[2])
-        self.assertEqual(self.board.weight_grid[8][1], w[0])
-        self.assertEqual(self.board.weight_grid[8][2], w[1])
+        self.assertEqual(self.board.p1_weight_grid[7][1], w1[1])
+        self.assertEqual(self.board.p1_weight_grid[7][2], w1[2])
+        self.assertEqual(self.board.p1_weight_grid[8][1], w1[0])
+        self.assertEqual(self.board.p1_weight_grid[8][2], w1[1])
+        self.assertEqual(self.board.p2_weight_grid[7][1], w2[1])
+        self.assertEqual(self.board.p2_weight_grid[7][2], w2[2])
+        self.assertEqual(self.board.p2_weight_grid[8][1], w2[0])
+        self.assertEqual(self.board.p2_weight_grid[8][2], w2[1])
 
         self.board.retract_turn()
+        self.assertEqual(self.board.p1_weight_grid[1][1], w1[0])
+        self.assertEqual(self.board.p1_weight_grid[1][2], w1[1])
+        self.assertEqual(self.board.p1_weight_grid[2][1], w1[1])
+        self.assertEqual(self.board.p1_weight_grid[2][2], w1[2])
+        self.assertEqual(self.board.p2_weight_grid[1][1], w2[0])
+        self.assertEqual(self.board.p2_weight_grid[1][2], w2[1])
+        self.assertEqual(self.board.p2_weight_grid[2][1], w2[1])
+        self.assertEqual(self.board.p2_weight_grid[2][2], w2[2])
 
-        self.assertEqual(self.board.weight_grid[1][1], w[0])
-        self.assertEqual(self.board.weight_grid[1][2], w[1])
-        self.assertEqual(self.board.weight_grid[2][1], w[1])
-        self.assertEqual(self.board.weight_grid[2][2], w[2])
-
-        ex_wg_score = 0
-        
+        ex_wg_score = [0, 0]
         for i in range (self.board.size):
             for j in range(self.board.size):
                 if self.board.board[i][j] != 0:
-                    ex_wg_score += self.board.weight_grid[i][j] * self.board.board[i][j]
+                    ex_wg_score[0] += self.board.p1_weight_grid[i][j] * self.board.board[i][j]
+                    ex_wg_score[1] += self.board.p2_weight_grid[i][j] * self.board.board[i][j]
 
         self.assertEqual(self.board.wg_score, ex_wg_score)
+
+    
+    def test_weight_game_phase_selection(self):
+        player = self.board.whose_turn
+        opponent = player * -1
+
+        for move in self.moves:
+            self.board.find_moves(player, opponent)
+            self.board.make_move(player, opponent, move)
+            self.board.advance_turn(0)
+            player = self.board.whose_turn
+            opponent = player * -1
+
+        self.board.update_stability()
+        ex_diff = self.board.disc_difference
+        ex_wg_score = self.board.wg_score[0] / 100
+        ex_mob = sum([self.board.mobility[0], self.board.mobility[1]]) / 2
+        ex_pmob = sum([self.board.p_mobility[0], self.board.p_mobility[1]]) / 2
+        ex_stab = self.board.stability
+
+        ex_score = []
+        for i in range(3):
+            w = self.board.p1_weight_phases[i]
+            ex_score.append(int((ex_diff * w[0]) + (ex_wg_score * w[1]) +
+                         (ex_mob * w[2]) + (ex_pmob * w[3]) + (ex_stab * w[4])))
+
+        score = self.board.heuristics()
+        self.assertEqual(score, ex_score[0])
+
+        self.board.move_count = 30
+        score = self.board.heuristics()
+        self.assertEqual(score, ex_score[1])
+
+        self.board.move_count = 45
+        score = self.board.heuristics()
+        self.assertEqual(score, ex_score[2])
 
 
 if __name__ == "__main__":

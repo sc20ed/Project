@@ -1,4 +1,4 @@
-from othello.game import run_game_test
+from othello.game import run_game, run_game_test
 import logging
 
 # create log and set config
@@ -38,12 +38,12 @@ def main():
         # cpu vs cpu
         if option == 1:
             log.info("Starting CPU vs CPU game")
-            p1_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
-                          [-2, 1, 2, 1, 1], [-1, 2, 2, 1, 1], [2, 1, 2, 1, 2]]
-            p2_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
-                          [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
+            p1 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                  [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]]
+            p2 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                  [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
             
-            winner, score = run_game_test(8, 2, 4, 2, 4, 3)
+            winner, score = run_game(8, 0, 4, p1, 2, 4, p2, 0)
             if winner == 0:
                 print(f"DRAW")
                 log.info("Draw with score %s", score)
