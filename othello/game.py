@@ -54,7 +54,7 @@ def turn(board, p_type, depth=4, endgame=False):
         log.debug("No move available, turn passed")
         passed = True
     else:
-        board.make_move(player, opponent, (move))
+        board.make_move(player, opponent, move)
         log.debug("Made move")
         board.advance_turn(0)
         passed = False
@@ -95,14 +95,15 @@ def turn(board, p_type, depth=4, endgame=False):
         if endgame:
             log.debug("Endgame search, only final disc_diff considered")
     
-    return passed
+    return passed, move
 
 
-# run game based on arguments
+# run test game based on arguments
+# the board position is printed to the command line each turn
 # p_type arguments represent the method used for move selection
-def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_moves=0):
+def run_game_test(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_moves=0):
 
-    # initialise board a with set number of random moves
+    # initialise board representation
     board = Board(size)
 
     # play random starting moves
@@ -116,35 +117,36 @@ def run_game(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_move
         # adjust turn order
         if n_random_moves % 2 == 1:
             p1_type, p2_type = p2_type, p1_type
+            p1_depth, p2_depth, = p2_depth, p1_depth
             log.debug("Swapped turn order to offset odd number of random moves")
 
     # main game loop
     active = 1
     endgame = False
     while active == 1:
-        if board.move_count >= board.max_moves - 10:
+        moves_remaining = board.max_moves - board.move_count
+        if moves_remaining <= 8:
             endgame = True
-            moves_remaining = board.max_moves - board.move_count
-            #p1_depth = moves_remaining
+            p1_depth = moves_remaining
             p2_depth = moves_remaining
 
         log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
-        p1_pass = turn(board, p1_type, p1_depth, False)
+        p1_pass, move = turn(board, p1_type, p1_depth, endgame)
         print(board.turn_count)
         board.display()
         print("")
         
-        if board.move_count >= board.max_moves:
+        if moves_remaining == 0:
             log.debug("Board full, game complete")
             break
 
         log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
-        p2_pass = turn(board, p2_type, p2_depth, endgame)
+        p2_pass, move = turn(board, p2_type, p2_depth, endgame)
         print(board.turn_count)
         board.display()
         print("")
 
-        if board.move_count >= board.max_moves:
+        if moves_remaining == 0:
             log.debug("Board full, game complete")
             break
         

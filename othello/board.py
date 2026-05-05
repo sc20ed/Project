@@ -6,8 +6,8 @@ log = logging.getLogger("board.py")
 
 # object to handle current board, game state and heuristics
 class Board:
-    def __init__(self, size=8, weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
-                                          [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]):
+    def __init__(self, size=8, weights=[[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                                        [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]):
         self.board = []
         self.weight_grid = []
         self.unmake_list = []
