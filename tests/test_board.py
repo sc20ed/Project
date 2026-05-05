@@ -748,7 +748,14 @@ class TestHeuristics(unittest.TestCase):
             player = self.board.whose_turn
             opponent = player * -1
 
-        self.assertEqual(self.board.wg_score, -35)
+        ex_wg_score = 0
+        for i, j in [(4, 4), (5, 4), (6, 3)]:
+            ex_wg_score += self.board.weight_grid[i][j] * 1
+
+        for i, j in [(2, 5), (3, 5), (4, 5), (5, 5), (5, 6)]:
+            ex_wg_score += self.board.weight_grid[i][j] * -1
+
+        self.assertEqual(self.board.wg_score, ex_wg_score)
 
 
     def test_retract_heuristics(self):
