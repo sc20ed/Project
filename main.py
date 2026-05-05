@@ -1,11 +1,11 @@
-from othello.game import run_game
+from othello.game import run_game_test
 import logging
 
 # create log and set config
 log = logging.getLogger("main.py")
-logging.basicConfig(filename="othello/log.txt", filemode="w",
-                    format='%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s',
-                    datefmt='%m/%d/%Y %I:%M:%S %p', encoding="utf-8", level=logging.INFO)
+logging.basicConfig(filename="othello/log.txt", filemode='w',
+                    format="%(asctime)s | %(name)-8s | %(levelname)-8s | %(message)s",
+                    datefmt="%m/%d/%Y %I:%M:%S %p", encoding="utf-8", level=logging.DEBUG)
 
 # prompt user to change the logging level
 def set_logging_level():
@@ -38,7 +38,12 @@ def main():
         # cpu vs cpu
         if option == 1:
             log.info("Starting CPU vs CPU game")
-            winner, score = run_game(8, 0, 2, 0)
+            p1_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                          [-2, 1, 2, 1, 1], [-1, 2, 2, 1, 1], [2, 1, 2, 1, 2]]
+            p2_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                          [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
+            
+            winner, score = run_game_test(8, 2, 4, 2, 4, 3)
             if winner == 0:
                 print(f"DRAW")
                 log.info("Draw with score %s", score)
@@ -50,7 +55,7 @@ def main():
         # player vs cpu
         elif option == 2:
             log.info("Starting Player vs CPU game")
-            winner, score = run_game(8, 3, 2, 0)
+            winner, score = run_game_test(8, 3, 0, 2, 4, 0)
             if winner == 0:
                 print(f"DRAW")
                 log.info("Draw with score %s", score)

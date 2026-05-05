@@ -1,6 +1,6 @@
 import unittest, unittest.mock
 import contextlib
-from othello.game import run_game, turn
+from othello.game import run_game_test, turn
 from othello.board import Board
 
 
@@ -73,10 +73,13 @@ class TestTurn(unittest.TestCase):
 
 
 # test different types of game function correctly
+# run_game_test() is used as it is an older game function but is functionally
+# the same as run_game() besides having both players use the same set of weights
+# stdout is redirected because this test function usually prints to the command line
 class TestGame(unittest.TestCase):
     def test_random_game(self):
         with contextlib.redirect_stdout(None):
-            winner, score = run_game()
+            winner, score = run_game_test()
 
         self.assertIs(type(winner), int)
         self.assertIs(type(score), tuple)
@@ -84,7 +87,7 @@ class TestGame(unittest.TestCase):
 
     def test_random_game_large(self):
         with contextlib.redirect_stdout(None):
-            winner, score = run_game(16)
+            winner, score = run_game_test(16)
 
         self.assertIs(type(winner), int)
         self.assertIs(type(score), tuple)
@@ -92,7 +95,7 @@ class TestGame(unittest.TestCase):
 
     def test_search_game(self):
         with contextlib.redirect_stdout(None):
-            winner, score = run_game(8, 0, 2)
+            winner, score = run_game_test(8, 0, 0, 2, 4)
 
         self.assertIs(type(winner), int)
         self.assertIs(type(score), tuple)
@@ -100,7 +103,7 @@ class TestGame(unittest.TestCase):
 
     def test_search_game_large(self):
         with contextlib.redirect_stdout(None):
-            winner, score = run_game(12, 0, 2, 120)
+            winner, score = run_game_test(12, 0, 0, 2, 4, 120)
 
         self.assertIs(type(winner), int)
         self.assertIs(type(score), tuple)
@@ -109,7 +112,7 @@ class TestGame(unittest.TestCase):
     def test_player_order_swap(self):
         with self.assertLogs("game.py", 10) as logs:
             with contextlib.redirect_stdout(None):
-                winner, score = run_game(8, 0, 2, 1)
+                winner, score = run_game_test(8, 0, 0, 2, 2, 1)
 
         ex_log = "DEBUG:game.py:Swapped turn order to offset odd number of random moves"
         self.assertIn(ex_log, logs.output)
@@ -120,7 +123,7 @@ class TestGame(unittest.TestCase):
     def test_random_moves_1(self):
         with self.assertLogs("game.py", 10) as logs:
             with contextlib.redirect_stdout(None):
-                winner, score = run_game(8, 0, 2, 4)
+                winner, score = run_game_test(8, 0, 0, 2, 2, 4)
 
         ex_log = "DEBUG:game.py:Swapped turn order to offset odd number of random moves"
         self.assertNotIn(ex_log, logs.output)
@@ -131,7 +134,7 @@ class TestGame(unittest.TestCase):
     def test_random_moves_2(self):
         with self.assertLogs("game.py", 10) as logs:
             with contextlib.redirect_stdout(None):
-                winner, score = run_game(8, 0, 2, 5)
+                winner, score = run_game_test(8, 0, 0, 2, 2, 5)
 
         ex_log = "DEBUG:game.py:Swapped turn order to offset odd number of random moves"
         self.assertIn(ex_log, logs.output)
@@ -142,7 +145,7 @@ class TestGame(unittest.TestCase):
     def test_random_moves_full(self):
         with self.assertLogs("game.py", 10) as logs:
             with contextlib.redirect_stdout(None):
-                winner, score = run_game(8, 0, 2, 60)
+                winner, score = run_game_test(8, 0, 0, 2, 2, 60)
                 
         ex_log = "DEBUG:game.py:Board full, game complete"
         self.assertIn(ex_log, logs.output)      
@@ -153,11 +156,22 @@ class TestGame(unittest.TestCase):
     def test_no_moves(self):
         with self.assertLogs("game.py", 10) as logs:
             with contextlib.redirect_stdout(None):
-                winner, score = run_game(2, 0, 0)
+                winner, score = run_game_test(2)
         ex_log = "DEBUG:game.py:Board full, game complete"
         self.assertIn(ex_log, logs.output)      
         self.assertEqual(winner, 0)
         self.assertEqual(score, (2, 2))
+
+    
+    def test_endgame_search(self):
+        endgame_depth = 10
+        with self.assertLogs("game.py", 10) as logs:
+            with contextlib.redirect_stdout(None):
+                winner, score = run_game_test(8, 0, 0, 2, 2, 50)
+        ex_log = "DEBUG:game.py:Endgame search, only final disc_diff considered"
+        self.assertIn(ex_log, logs.output)      
+        self.assertIs(type(winner), int)
+        self.assertIs(type(score), tuple)
 
 
 if __name__ == "__main__":

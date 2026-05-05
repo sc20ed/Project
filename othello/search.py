@@ -1,7 +1,10 @@
 # basic minimax
-def minimax(board, depth, maximising):
+def minimax(board, depth, maximising, endgame=False):
     if depth == 0 or board.move_count >= board.max_moves:
-        return None, board.heuristics()
+        if endgame:
+            return None,  board.disc_difference
+        else:
+            return None, board.heuristics()
     
     # MAX PLAYER
     if maximising:
@@ -55,9 +58,12 @@ def minimax(board, depth, maximising):
 
 
 # minimax with alpha-beta pruning
-def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
+def alpha_beta(board, depth, maximising, endgame=False, alpha=-999999, beta=999999):
     if depth == 0 or board.move_count >= board.max_moves:
-        return None, board.heuristics()
+        if endgame:
+            return None, board.disc_difference
+        else:
+            return None, board.heuristics()
     
     # MAX PLAYER
     if maximising:
@@ -66,7 +72,7 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
 
         if len(moves) == 0:
             board.advance_turn(1)
-            _, temp_score = alpha_beta(board, depth-1, False, alpha, beta)
+            _, temp_score = alpha_beta(board, depth-1, False, endgame, alpha, beta)
             board.retract_turn()
 
             if temp_score > score:
@@ -78,14 +84,14 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
         for move in moves:
             board.make_move(1, -1, move)
             board.advance_turn(0)
-            _, temp_score = alpha_beta(board, depth-1, False, alpha, beta)
+            _, temp_score = alpha_beta(board, depth-1, False, endgame, alpha, beta)
             board.retract_turn()
 
             if temp_score > score:
                 score = temp_score
                 best_move = move
 
-            # stop evaluating subtree if a move guarantees it won't be chosen by MIN
+            # stop evaluating subtree if a move guarantees it won't be chosen by min
             if score >= beta:
                 break
 
@@ -98,7 +104,7 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
 
         if len(moves) == 0:
             board.advance_turn(1)
-            _, temp_score = alpha_beta(board, depth-1, True, alpha, beta)
+            _, temp_score = alpha_beta(board, depth-1, True, endgame, alpha, beta)
             board.retract_turn()
 
             if temp_score < score:
@@ -110,15 +116,15 @@ def alpha_beta(board, depth, maximising, alpha=-999999, beta=999999):
         for move in moves:
             board.make_move(-1, 1, move)
             board.advance_turn(0)
-            _, temp_score = alpha_beta(board, depth-1, True, alpha, beta)
+            _, temp_score = alpha_beta(board, depth-1, True, endgame, alpha, beta)
             board.retract_turn()
 
-            if temp_score <= score:
+            if temp_score < score:
                 score = temp_score
                 best_move = move
 
-            # stop evaluating subtree if a move guarantees it won't be chosen by MAX
-            if score < alpha:
+            # stop evaluating subtree if a move guarantees it won't be chosen by max
+            if score <= alpha:
                 break
 
             beta = min(beta, score)

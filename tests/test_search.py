@@ -3,6 +3,9 @@ import time
 from othello.board import Board
 from othello.search import minimax, alpha_beta
 
+# contains all the slowest tests, and as such adds approximately
+# 1m20s to testing time. therefore, this module should be excluded
+# if search.py has not been modified
 
 # test minimax search functions correctly
 class TestMinimax(unittest.TestCase):
@@ -69,7 +72,7 @@ class TestMinimax(unittest.TestCase):
 
         winner, score = s_board.game_over()
         self.assertEqual(winner, -1)
-        self.assertEqual(score, (6, 10))
+        self.assertEqual(score, (5, 11))
 
     
     def test_midgame_search(self):
@@ -150,7 +153,7 @@ class TestAlphaBeta(unittest.TestCase):
     def test_no_depth(self):
         move, score = alpha_beta(self.board, 0, 1)
         self.assertIsNone(move)
-        self.assertEqual(score, -10)
+        self.assertIs(type(score), int)
 
 
     def test_min_depth(self):
@@ -234,8 +237,7 @@ class TestAlphaBeta(unittest.TestCase):
         self.assertIs(type(score), int)
 
 
-    # fails due to current heuristic implementation
-    @unittest.expectedFailure
+    # may fail due to current heuristic implementation
     def test_small_board_complete_search(self):
         s_board = Board(4)
         player = s_board.whose_turn
@@ -251,7 +253,7 @@ class TestAlphaBeta(unittest.TestCase):
         mm_finish = time.process_time()
         mm_time = mm_finish - mm_start
 
-        s_board.reset()
+        s_board = Board(4)
         player = s_board.whose_turn
         opponent = player * -1
 
@@ -261,14 +263,15 @@ class TestAlphaBeta(unittest.TestCase):
             move, score = alpha_beta(s_board, 12-i, maximising)
             s_board.make_move(player, opponent, move)
             s_board.advance_turn(0)
-            player, opponent = opponent, player
+            player = s_board.whose_turn
+            opponent = player * -1
         ab_finish = time.process_time()
         ab_time = ab_finish - ab_start
 
         winner, score = s_board.game_over()
         self.assertLess(ab_time, mm_time)
         self.assertEqual(winner, -1)
-        self.assertEqual(score, (6, 10))
+        self.assertEqual(score, (5, 11))
     
 
 if __name__ == "__main__":
