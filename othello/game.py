@@ -108,7 +108,6 @@ def turn(board, p_type, depth=4, endgame=False):
     return passed
 
 # run test game based on arguments
-# the board position is printed to the command line each turn
 # p_type arguments represent the method used for move selection
 def run_game(size=8, p1_type=0, p1_depth=0, p1_weights=None,
                   p2_type=0, p2_depth=0, p2_weights=None, n_random_moves=0):
@@ -140,16 +139,12 @@ def run_game(size=8, p1_type=0, p1_depth=0, p1_weights=None,
 
         log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
         p1_pass = turn(board, p1_type, p1_depth, endgame)
-        board.display()
-        print("")
         if moves_remaining == 0:
             log.debug("Board full, game complete")
             break
 
         log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
         p2_pass = turn(board, p2_type, p2_depth, endgame)
-        board.display()
-        print("")
         if moves_remaining == 0:
             log.debug("Board full, game complete")
             break
