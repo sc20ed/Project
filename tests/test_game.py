@@ -1,6 +1,6 @@
 import unittest, unittest.mock
 import contextlib
-from othello.game import run_game_test, turn
+from othello.game import run_game, run_game_test, turn
 from othello.board import Board
 
 
@@ -171,6 +171,17 @@ class TestGame(unittest.TestCase):
         ex_log = "DEBUG:game.py:Endgame search, only final disc_diff considered"
         self.assertIn(ex_log, logs.output)      
         self.assertIs(type(winner), int)
+        self.assertIs(type(score), tuple)
+
+    
+    def test_separate__heuristics_game(self):
+        p1 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+              [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]]
+        p2 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+              [2, -1, -2, -2, -1], [1, -0.7, -2, -1, -1], [-2, -0.5, -2, -1, -3]]
+        
+        winner, score = run_game(8, 2, 2, p1, 2, 2, p2, 0) 
+        self.assertEqual(winner, 1)
         self.assertIs(type(score), tuple)
 
 

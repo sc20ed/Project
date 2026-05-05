@@ -24,14 +24,10 @@ class Board:
         self.wg_score = [0, 0]
         self.p1_weight_grid = []
         self.p1_grid_weights = p1_weights[0]
-        self.p1_gp1_weights = p1_weights[1]
-        self.p1_gp2_weights = p1_weights[2]
-        self.p1_gp3_weights = p1_weights[3]
+        self.p1_weight_phases = p1_weights[1:]
         self.p2_weight_grid = []
         self.p2_grid_weights = p2_weights[0]
-        self.p2_gp1_weights = p2_weights[1]
-        self.p2_gp2_weights = p2_weights[2]
-        self.p2_gp3_weights = p2_weights[3]
+        self.p2_weight_phases = p2_weights[1:]
 
         midpoint = int(self.size/2)
         self.setup_board(midpoint)            
@@ -185,7 +181,6 @@ class Board:
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
                     self.p2_weight_grid[i][j] = self.p2_grid_weights[2] / -4
                     self.wg_score[1] += self.p2_weight_grid[i][j] * s_player
-                    
                 else:
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[1] * -1
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
@@ -199,12 +194,11 @@ class Board:
                 self.wg_score[1] -= self.p2_weight_grid[i][j] * s_player
                 wg_change.append((i, j))
 
-                if (i, j) == (2, 2):
+                if (i, j) == (2, self.size-3):
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[2] / -4
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
                     self.p2_weight_grid[i][j] = self.p2_grid_weights[2] / -4
                     self.wg_score[1] += self.p2_weight_grid[i][j] * s_player
-                    
                 else:
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[1] * -1
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
@@ -218,12 +212,11 @@ class Board:
                 self.wg_score[1] -= self.p2_weight_grid[i][j] * s_player
                 wg_change.append((i, j))
 
-                if (i, j) == (2, 2):
+                if (i, j) == (self.size-3, 2):
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[2] / -4
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
                     self.p2_weight_grid[i][j] = self.p2_grid_weights[2] / -4
                     self.wg_score[1] += self.p2_weight_grid[i][j] * s_player
-                    
                 else:
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[1] * -1
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
@@ -237,12 +230,11 @@ class Board:
                 self.wg_score[1] -= self.p2_weight_grid[i][j] * s_player
                 wg_change.append((i, j))
 
-                if (i, j) == (2, 2):
+                if (i, j) == (self.size-3, self.size-3):
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[2] / -4
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
                     self.p2_weight_grid[i][j] = self.p2_grid_weights[2] / -4
                     self.wg_score[1] += self.p2_weight_grid[i][j] * s_player
-                    
                 else:
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[1] * -1
                     self.wg_score[0] += self.p1_weight_grid[i][j] * s_player
@@ -322,7 +314,7 @@ class Board:
                     self.p2_weight_grid[i][j] = self.p2_grid_weights[2]
                 else:
                     self.p1_weight_grid[i][j] = self.p1_grid_weights[1]
-                    self.p2_weight_grid[i][j] = self.p2_grid_weights[2]
+                    self.p2_weight_grid[i][j] = self.p2_grid_weights[1]
 
         self.mobility = prev_turn.popleft()
         self.p_mobility = prev_turn.popleft()
@@ -674,19 +666,19 @@ class Board:
         if self.whose_turn == 1:
             p_wg_score = self.wg_score[0]
             if self.move_count < int(self.max_moves/4):
-                w = self.p1_gp1_weights
+                w = self.p1_weight_phases[0]
             elif self.move_count < int((self.max_moves*2)/3):
-                w = self.p1_gp2_weights
+                w = self.p1_weight_phases[1]
             else:
-                w = self.p1_gp3_weights
+                w = self.p1_weight_phases[2]
         else:
             p_wg_score = self.wg_score[1]
             if self.move_count < int(self.max_moves/4):
-                w = self.p2_gp1_weights
+                w = self.p2_weight_phases[0]
             elif self.move_count < int((self.max_moves*2)/3):
-                w = self.p2_gp2_weights
+                w = self.p2_weight_phases[1]
             else:
-                w = self.p2_gp3_weights
+                w = self.p2_weight_phases[2]
 
         # compute heuristic scores from weights
         self.update_stability()
