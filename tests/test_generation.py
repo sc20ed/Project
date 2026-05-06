@@ -24,15 +24,15 @@ class TestPopulation(unittest.TestCase):
     def test_gen_initial_population(self):
         self.gen.gen_initial_population(50)
         self.assertEqual(len(self.gen.population), 50)
-        self.assertEqual(len(self.gen.population[0]), 3)
-        self.assertEqual(len(self.gen.population[0][2]), 4)
+        self.assertEqual(len(self.gen.population[0]), 4)
+        self.assertEqual(len(self.gen.population[0][3]), 4)
 
 
     def test_gen_initial_population_large(self):
         self.gen.gen_initial_population(1000)
         self.assertEqual(len(self.gen.population), 1000)
-        self.assertEqual(len(self.gen.population[500]), 3)
-        self.assertEqual(len(self.gen.population[500][2]), 4)
+        self.assertEqual(len(self.gen.population[500]), 4)
+        self.assertEqual(len(self.gen.population[500][3]), 4)
 
 
     def test_load_population(self):

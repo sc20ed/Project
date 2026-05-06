@@ -69,19 +69,19 @@ def turn(board, p_type, depth=4, endgame=False):
         if board.whose_turn == 1:
             p_wg_score = board.wg_score[0]
             if board.move_count < int(board.max_moves/4):
-                w = board.p1_gp1_weights
+                w = board.p1_weight_phases[0]
             elif board.move_count < int((board.max_moves*2)/3):
-                w = board.p1_gp2_weights
+                w = board.p1_weight_phases[1]
             else:
-                w = board.p1_gp3_weights
+                w = board.p1_weight_phases[2]
         else:
             p_wg_score = board.wg_score[1]
             if board.move_count < int(board.max_moves/4):
-                w = board.p2_gp1_weights
+                w = board.p2_weight_phases[0]
             elif board.move_count < int((board.max_moves*2)/3):
-                w = board.p2_gp2_weights
+                w = board.p2_weight_phases[1]
             else:
-                w = board.p2_gp3_weights
+                w = board.p2_weight_phases[2]
     
         score = board.heuristics()
         w_disc = board.disc_difference * w[0]
