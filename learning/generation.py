@@ -179,3 +179,5 @@ class Generation:
     # generate new population based on the fitness of the previous generation
     def next_generation(self):
         pass
+        #take current pop
+        # eliminate x number
