@@ -1,6 +1,6 @@
 from othello.board import Board
 from othello.search import minimax, alpha_beta
-from random import randint
+import random
 import logging
 
 log = logging.getLogger("game.py")
@@ -16,7 +16,7 @@ def turn(board, p_type, depth=4, endgame=False):
     if p_type == 0:
         moves = board.find_moves(player, opponent)
         if len(moves) > 0:
-            move = moves[randint(0, len(moves)-1)]
+            move = moves[random.randint(0, len(moves)-1)]
             log.debug("Randomly selected move %s", move)
 
     elif p_type == 1:

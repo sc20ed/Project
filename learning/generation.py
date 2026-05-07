@@ -1,8 +1,8 @@
 from othello.game import run_game
 from itertools import combinations
-from random import randint
-import csv
 from multiprocessing import Pool
+import random
+import csv
 import logging
 
 log = logging.getLogger("generation.py")
@@ -19,7 +19,7 @@ class Generation:
         self.crossover_rate = 0.8
         self.mutation_incidence = 0.5
         self.mutation_rate = 0.2
-        self.base_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+        self.guide_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
                              [-0.5, 1, 2, 2, 1], [0.5, 1, 2, 1, 1], [1.5, 1, 2, 0.5, 1]]
 
         if pop_to_load:
@@ -28,36 +28,43 @@ class Generation:
     
     # generate set of heuristic weights
     # each weight is randomly distributed around the base value
-    def gen_player_weights(self, base_weights, factor):
+    def gen_player_weights(self, base_weights):
         weights = []
         
-        # separated grid weights and weight phases as grid weights should be less variable
+        # separated grid weights and weight phases as grid weights should be separately tunable
+        # additionally, the corner is not allowed below 500, as this is intuitively bad
         grid_weights = []
-        wg_factor = int(factor/2)
-        for value in base_weights[0]:
-            diff = int(value * (randint(-100 * wg_factor, 100 * wg_factor)/100))
-            grid_weights.append(value + diff)
+        for floor, ceiling in zip(base_weights[0][0], base_weights[1][0]):
+            if floor >= ceiling:
+                floor, ceiling = ceiling, floor
+            value = random.randint(floor, ceiling)
+            grid_weights.append(value)
         weights.append(grid_weights)
 
-        for weight_phase in base_weights[1:]:
+        for f_w_phase, c_w_phase in zip(base_weights[0][1:], base_weights[1][1:]):
             phase = []
-            for value in weight_phase:
-                diff = value * (randint(-100 * factor, 100 * factor)/100)
-                phase.append(round(value + diff, 2))
+            for floor, ceiling in zip(f_w_phase, c_w_phase):
+                if floor >= ceiling:
+                    floor, ceiling = ceiling, floor
+                value = round(random.uniform(floor, ceiling), 2)
+                phase.append(value)
             weights.append(phase)
 
         return weights
 
 
     # generate population of players from given parameters
-    def gen_initial_population(self, size=10, factor=2,
-                               base_weights=[[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
-                                             [-0.5, 1, 2, 2, 1], [0.5, 1, 2, 1, 1], [1.5, 1, 2, 0.5, 1]]):
+    def gen_initial_population(self, size=10,
+                               base_weight_floor=[[500, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000],
+                                                  [-3, -3, -3,-3,-3], [-3, -3,-3,-3,-3], [-3, -3, -3, -3, -3]],
+                               base_weight_ceiling=[[5000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
+                                                    [3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],):
         self.generation = 0
         self.population.clear()
+        base_weights = [base_weight_floor, base_weight_ceiling]
 
         for i in range(size):
-            weights = self.gen_player_weights(base_weights, factor)
+            weights = self.gen_player_weights(base_weights)
             player = [i+1, 0, [0, 0, 0], weights]
             self.population.append(player)
 
@@ -167,17 +174,64 @@ class Generation:
     
 
     # crossover/breed two players to produce two offspring
-    def crossover(self):
-        pass
+    def crossover(self, parent_1, parent_2):
+        
+        # create two children
+        # one is random distance inbetween, and one randomly selects a value from both parents
+
+        parents = [parent_1, parent_2]
+        child_1 = self.gen_player_weights(parents)
+        child_2 = self.gen_player_weights(parents)
+
+        return child_1, child_2
 
 
     # mutate some weights of population members randomly
     def mutation(self):
         pass
+        # mutate genes by small factor
+        # or mutate x% of genes somewhat
 
 
     # generate new population based on the fitness of the previous generation
     def next_generation(self):
-        pass
-        #take current pop
-        # eliminate x number
+        new_pop = []
+        pop = sorted(self.population, key=lambda player: player[1], reverse=True)
+        elitist_selection = pop[:int(len(pop)*0.1)]
+        for i, player in enumerate(elitist_selection):
+            new_pop.append([i+1, 0, [0, 0, 0], player[3]])
+                           
+        for i in range(int(len(pop)*0.1)):
+            pop.pop()
+
+        mutation_count = 0
+        random.shuffle(pop)
+        while len(pop) > 1:
+            parent_1 = pop.pop()[3]
+            parent_2 = pop.pop()[3]
+            child_1, child_2 = self.crossover(parent_1, parent_2)
+            family = [parent_1, parent_2, child_1, child_2]
+            rand_s1 = random.randint(0, 3)
+            rand_s2 = random.randint(0, 3)
+            survivor_1, survivor_2 = [family[rand_s1], family[rand_s2]] #family_tournament(family)
+            if random.random() > self.mutation_incidence:
+                mutation_count += 1
+            # fix to player format TBC
+            new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_1])
+            new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_2])
+        
+        if pop:
+            new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], pop.pop()[3]])
+
+        print(mutation_count)
+
+        return new_pop
+
+        # take current pop
+        # save top 10%
+        # replace bottom 10% with initial gens
+        # for the remaining 90%, randomly pair up and crossbreed
+        # for the children, mutate one child a little and one a lot 
+        # play a 4 game check tournament and add the two fittest to the new population
+        # pop = top 10% + bred and mutated + regen 10%
+        # gen += 1
