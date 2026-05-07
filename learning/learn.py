@@ -10,24 +10,12 @@ def test_eval():
 
     # test
     time_start = time.time()
-    gen.gen_initial_population(5)
+    gen.gen_initial_population(10)
     gen.evaluate_fitness()
-
-    for row in gen.population:
-        print(row)
-        print("")
-
-    new_pop = gen.next_generation()
-
-    print("POP")
-
-    for row in new_pop:
-        print(row)
-        print("")
-
-    print(len(new_pop))
-
+    gen.save_population_to_file("test3_gen0.csv")
+    gen.next_generation()
     time_end = time.time()
-    time_elapsed = time_end - time_start
 
-    log.info("Test 1 completed with time %3.3f seconds", time_elapsed)
+    time_elapsed = str(round(time_end - time_start, 3)) + " seconds"
+    gen.save_population_to_file("test3_gen1.csv")
+    log.info("Test 1 completed with time %s seconds", time_elapsed)

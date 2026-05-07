@@ -224,11 +224,17 @@ class Generation:
     # generate new population based on the fitness of the previous generation
     def next_generation(self):
         new_pop = []
+
+        # keeps the top 10% of the population so good players don't disappear
         pop = sorted(self.population, key=lambda player: player[1], reverse=True)
         elitist_selection = pop[:int(len(pop)*0.1)]
         for i, player in enumerate(elitist_selection):
             new_pop.append([i+1, 0, [0, 0, 0], player[3]])
 
+        # select 50% (rounded down) of the population for parents
+        # fitness^4 is used for weighting so that higher fitness players are selected more frequently
+        # the * 10 in (choice[1]*10)**4 is for testing readability
+        # this may also ensure floating point precision issues are avoided
         prob_selection = []
         fitness_weights = []     
         for player in pop:
@@ -242,6 +248,7 @@ class Generation:
             prob_selection.append(choice)
         random.shuffle(prob_selection)
 
+        # crossover parents to produce 4 children, then mutate
         families = []
         while len(prob_selection) > 1:
             parent_1 = prob_selection.pop()
@@ -252,54 +259,14 @@ class Generation:
             family.extend(children)
             families.append(family)
 
+        # execute family evaluation and trimming in parallel
         with Pool() as pool:
             trimmed_families = pool.map(self.family_co_evaluation, families)
 
         pop_count = len(new_pop)
         for family in trimmed_families:
-            print("")
-            print("FAMILY")
-            print("")
             for player in family:
-                print("")
-                print(player)
                 pop_count += 1
-                player[0] = pop_count
-                player[1], player[2] = 0, [0, 0, 0]
-                new_pop.append(player)
+                new_pop.append([pop_count, 0, [0, 0, 0], player[3]])
     
-
-        return new_pop
-
-
-        survivor_1, survivor_2 = [family[rand_s1], family[rand_s2]] #family_tournament(family)
-
-        if random.random() > self.mutation_incidence:
-            mutation_count += 1
-        # fix to player format TBC
-        new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_1])
-        new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_2])
-
-            
-
-        for parent in parent_order:
-            print(parent)
-            print("")
-
-        mutation_count = 0
-
-            
-        
-        if pop:
-            new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], pop.pop()[3]])
-
-        return new_pop
-
-        # take current pop
-        # save top 10%
-        # replace bottom 10% with initial gens
-        # for the remaining 90%, randomly pair up and crossbreed
-        # for the children, mutate one child a little and one a lot 
-        # play a 4 game check tournament and add the two fittest to the new population
-        # pop = top 10% + bred and mutated + regen 10%
-        # gen += 1
+        self.population = new_pop
