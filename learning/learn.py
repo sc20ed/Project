@@ -10,7 +10,7 @@ def test_eval():
 
     # test
     time_start = time.time()
-    gen.gen_initial_population(10)
+    gen.gen_initial_population(5)
     gen.evaluate_fitness()
 
     for row in gen.population:

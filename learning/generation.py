@@ -159,8 +159,11 @@ class Generation:
 
 
     # run evaluation games in parallel and update fitness of each member of population
-    def evaluate_fitness(self):
-        pairs = list(combinations(self.population, 2))
+    def evaluate_fitness(self, population=None):
+        if not population:
+            population = self.population
+
+        pairs = list(combinations(population, 2))
         with Pool() as pool:
             pair_game_results = pool.starmap(self.run_co_evaluation_games, pairs)
             
@@ -179,11 +182,17 @@ class Generation:
         # create two children
         # one is random distance inbetween, and one randomly selects a value from both parents
 
-        parents = [parent_1, parent_2]
-        child_1 = self.gen_player_weights(parents)
-        child_2 = self.gen_player_weights(parents)
+        parent_weights = [parent_1[3], parent_2[3]]
+        child_1 = [2, 0, [0, 0, 0]]
+        child_1.append(self.gen_player_weights(parent_weights))
+        child_2 = [3, 0, [0, 0, 0]]
+        child_2.append(self.gen_player_weights(parent_weights))
+        child_3 = [4, 0, [0, 0, 0]]
+        child_3.append(self.gen_player_weights(parent_weights))
+        child_4 = [5, 0, [0, 0, 0]]
+        child_4.append(self.gen_player_weights(parent_weights))
 
-        return child_1, child_2
+        return child_1, child_2, child_3, child_4
 
 
     # mutate some weights of population members randomly
@@ -192,6 +201,22 @@ class Generation:
         # mutate genes by small factor
         # or mutate x% of genes somewhat
 
+    
+    # evaluate family of players and return the family minus its two weakest members
+    def family_co_evaluation(self, family):
+        pairs = list(combinations(family, 2))
+        for pair in pairs:
+            pair_game_result = self.run_co_evaluation_games(pair[0], pair[1])
+            for i in range(3):
+                family[pair[0][0]][2][i] += pair_game_result[0][i]
+                family[pair[1][0]][2][i] += pair_game_result[1][i]
+
+        for player in family:
+            player[1] = round((player[2][0] + (player[2][2]/2)) / sum(player[2]), 3)
+        trimmed_family = sorted(family, key=lambda wld: wld[1], reverse=True)[:4]
+
+        return trimmed_family
+    
 
     # generate new population based on the fitness of the previous generation
     def next_generation(self):
@@ -200,30 +225,70 @@ class Generation:
         elitist_selection = pop[:int(len(pop)*0.1)]
         for i, player in enumerate(elitist_selection):
             new_pop.append([i+1, 0, [0, 0, 0], player[3]])
-                           
-        for i in range(int(len(pop)*0.1)):
-            pop.pop()
+
+        prob_selection = []
+        fitness_weights = []     
+        for player in pop:
+            fitness_weights.append((player[1]*10)**4)
+        for i in range(int(len(pop)/2)): 
+            choice = random.choices(pop, fitness_weights, k=1)[0]
+            pop.remove(choice)
+            fitness_weights.remove((choice[1]*10)**4)
+            choice[1] = 0
+            choice[2] = [0, 0, 0]
+            prob_selection.append(choice)
+        random.shuffle(prob_selection)
+
+        families = []
+        while len(prob_selection) > 1:
+            parent_1 = prob_selection.pop()
+            parent_2 = prob_selection.pop()
+            parent_1[0], parent_2[0] = 0, 1
+            children = self.crossover(parent_1, parent_2)
+            family = [parent_1, parent_2]
+            family.extend(children)
+            families.append(family)
+
+        with Pool() as pool:
+            trimmed_families = pool.map(self.family_co_evaluation, families)
+
+        pop_count = len(new_pop)
+        for family in trimmed_families:
+            print("")
+            print("FAMILY")
+            print("")
+            for player in family:
+                print("")
+                print(player)
+                pop_count += 1
+                player[0] = pop_count
+                player[1], player[2] = 0, [0, 0, 0]
+                new_pop.append(player)
+    
+
+        return new_pop
+
+
+        survivor_1, survivor_2 = [family[rand_s1], family[rand_s2]] #family_tournament(family)
+
+        if random.random() > self.mutation_incidence:
+            mutation_count += 1
+        # fix to player format TBC
+        new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_1])
+        new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_2])
+
+            
+
+        for parent in parent_order:
+            print(parent)
+            print("")
 
         mutation_count = 0
-        random.shuffle(pop)
-        while len(pop) > 1:
-            parent_1 = pop.pop()[3]
-            parent_2 = pop.pop()[3]
-            child_1, child_2 = self.crossover(parent_1, parent_2)
-            family = [parent_1, parent_2, child_1, child_2]
-            rand_s1 = random.randint(0, 3)
-            rand_s2 = random.randint(0, 3)
-            survivor_1, survivor_2 = [family[rand_s1], family[rand_s2]] #family_tournament(family)
-            if random.random() > self.mutation_incidence:
-                mutation_count += 1
-            # fix to player format TBC
-            new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_1])
-            new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], survivor_2])
+
+            
         
         if pop:
             new_pop.append([new_pop[-1][0] + 1, 0, [0, 0, 0], pop.pop()[3]])
-
-        print(mutation_count)
 
         return new_pop
 
