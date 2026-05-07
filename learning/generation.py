@@ -70,11 +70,12 @@ class Generation:
 
     
     # save population to file
-    def save_population_to_file(self, filename, file_dir="learning/saved_generations/"):
+    def save_population_to_file(self, filename, file_dir="learning/saved_generations/",
+                                time_taken="unknown"):
         if not self.population:
             return 1
         
-        gen_header = ["generation=" + str(self.generation)]
+        gen_header = ["generation=" + str(self.generation), "time_taken=" + str(time_taken)]
         p_header = ["player", "fitness", "win", "loss", "draw",
                   "gw1", "gw2", "gw3", "gw4", "gw5", "gw6", "gw7", "gw8", "gw9", "gw10", 
                   "gp1_w1", "gp1_w2", "gp1_w3", "gp1_w4", "gp1_w5",
@@ -111,7 +112,9 @@ class Generation:
             next(players, None)
             
             for row in players:
-                win_loss_draw = row[2:5]
+                win_loss_draw = []
+                for weight in row[2:5]:
+                    win_loss_draw.append(int(weight))
                 grid_weights = []
                 for weight in row[5:15]:
                     grid_weights.append(int(weight))
@@ -202,7 +205,7 @@ class Generation:
         # or mutate x% of genes somewhat
 
     
-    # evaluate family of players and return the family minus its two weakest members
+    # evaluate family of players and return the best 4
     def family_co_evaluation(self, family):
         pairs = list(combinations(family, 2))
         for pair in pairs:
