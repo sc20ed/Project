@@ -71,12 +71,13 @@ class Generation:
 
     
     # save population to file
-    def save_population_to_file(self, filename, time_taken="unknown",
+    def save_population_to_file(self, filename, times=["unknown", "unknown", "not reported"],
                                 file_dir="learning/saved_generations/"):
         if not self.population:
             return 1
         
-        gen_header = ["generation=" + str(self.generation), "time_taken=" + str(time_taken)]
+        gen_header = ["generation=" + str(self.generation),
+                      "start=" + times[0], "end=" + times[1], "time_taken=" + times[2]]
         p_header = ["player", "fitness", "win", "loss", "draw",
                   "gw1", "gw2", "gw3", "gw4", "gw5", "gw6", "gw7", "gw8", "gw9", "gw10", 
                   "gp1_w1", "gp1_w2", "gp1_w3", "gp1_w4", "gp1_w5",
@@ -270,7 +271,6 @@ class Generation:
         return mutated_player
     
 
-    
     # evaluate fitness within family of players and return the best four
     def family_co_evaluation(self, family):
         pairs = list(combinations(family, 2))
