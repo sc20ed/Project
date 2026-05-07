@@ -19,6 +19,7 @@ class Generation:
         self.crossover_rate = 0.8
         self.mutation_incidence = 0.5
         self.mutation_rate = 0.2
+        self.mutation_scale = 1
         self.guide_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
                              [-0.5, 1, 2, 2, 1], [0.5, 1, 2, 1, 1], [1.5, 1, 2, 0.5, 1]]
 
@@ -182,7 +183,6 @@ class Generation:
     # return a set of weights each selected from parents with equal chance
     def crossover(self, parent_weights):
         weights = []
-        
         grid_weights = []
         for p1, p2 in zip(parent_weights[0][0], parent_weights[1][0]):
             selection = random.randint(0, 1)
@@ -229,14 +229,49 @@ class Generation:
         return children
 
 
-    # mutate some weights of population members randomly
-    def mutation(self):
-        pass
-        # mutate genes by small factor
-        # or mutate x% of genes somewhat
+    # mutate some weights of a player randomly via one of two methods
+    def mutate(self, player, method=0):
+        mv = self.mutation_scale
+        mutated_player = [player[0], player[1], player[2]]
+        mutated_weights = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                           [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+
+        # randomly select elements to mutate significantly
+        if method == 0:
+            for i in range(10):
+                mutation = random.random()
+                if mutation < self.mutation_rate:
+                    mutated_weights[0][i] += int(player[3][0][i] + player[3][0][i] * random.uniform(-mv, mv))
+                else:
+                    mutated_weights[0][i] += int(player[3][0][i])
+
+            for i in range(1, 4):
+                for j in range(5):
+                    mutation = random.random()
+                    if mutation < self.mutation_rate:
+                        mutated_weights[i][j] += round(player[3][i][j] + random.uniform(-mv, mv), 2)
+                    else:
+                        mutated_weights[i][j] += int(player[3][i][i])
+    
+        # mutate all elements by a smaller amount
+        elif method == 1:
+            for i in range(10):
+                mutated_weights[0][i] += int(player[3][0][i] + player[3][0][i] * random.uniform(-mv/4, mv/4))
+
+            for i in range(1, 4):
+                for j in range(5):
+                    mutated_weights[i][j] += round(player[3][i][j] + random.uniform(-mv/2, mv/2), 2)
+
+        # ensure corner weight is above 500
+        if mutated_weights[0][0] < 500:
+            mutated_weights[0][0] += 500
+
+        mutated_player.append(mutated_weights)
+        return mutated_player
+    
 
     
-    # evaluate family of players and return the best four
+    # evaluate fitness within family of players and return the best four
     def family_co_evaluation(self, family):
         pairs = list(combinations(family, 2))
         for pair in pairs:
@@ -259,12 +294,13 @@ class Generation:
 
         # keep the top 10% of the population so good players don't disappear
         pop = sorted(self.population, key=lambda player: player[1], reverse=True)
-        elitist_selection = pop[:int(len(pop)*0.1)]
-        for player in elitist_selection:
+        elt_cut = int(len(pop)*0.1)
+        elitism_selection = pop[:elt_cut]
+        for player in elitism_selection:
             pop_count += 1
             new_pop.append([pop_count, 0, [0, 0, 0], player[3]])
 
-        # select 50% (rounded down) of the population for parents by fitness
+        # select 50% (minus the elitism selection) of the population for parents by fitness
         # fitness^4 is used for weighting so that higher fitness players are selected more frequently
         # the * 10 in (choice[1]*10)**4 is for testing readability
         # this may also ensure floating point precision issues are avoided
@@ -272,7 +308,7 @@ class Generation:
         fitness_weights = []     
         for player in pop:
             fitness_weights.append((player[1]*10)**4)
-        for i in range(int(len(pop)/2)): 
+        for i in range(int((len(pop) - elt_cut)/2)): 
             choice = random.choices(pop, fitness_weights, k=1)[0]
             pop.remove(choice)
             fitness_weights.remove((choice[1]*10)**4)
@@ -290,7 +326,17 @@ class Generation:
             children = self.breed(parent_1, parent_2)
             family = [parent_1, parent_2]
             family.extend(children)
-            families.append(family)
+
+            # mutate members of the family with preset chance
+            mutated_family = []
+            for player in family:
+                mutation = random.random()
+                if mutation < self.mutation_incidence:
+                    mutated_player = self.mutate(player)
+                    mutated_family.append(mutated_player)
+                else:
+                    mutated_family.append(player)
+            families.append(mutated_family)
 
         # if fitness selection is odd, insert remaining player
         if prob_selection:
@@ -307,3 +353,4 @@ class Generation:
                 new_pop.append([pop_count, 0, [0, 0, 0], player[3]])
     
         self.population = new_pop
+        self.generation += 1
