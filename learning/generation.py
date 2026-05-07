@@ -179,23 +179,54 @@ class Generation:
             player[1] = round((player[2][0] + (player[2][2]/2)) / sum(player[2]), 3)
     
 
-    # crossover/breed two players to produce two offspring
-    def crossover(self, parent_1, parent_2):
+    # return a set of weights each selected from parents with equal chance
+    def crossover(self, parent_weights):
+        weights = []
         
-        # create two children
-        # one is random distance inbetween, and one randomly selects a value from both parents
+        grid_weights = []
+        for p1, p2 in zip(parent_weights[0][0], parent_weights[1][0]):
+            selection = random.randint(0, 1)
+            if selection:
+                grid_weights.append(p1)
+            else:
+                grid_weights.append(p2)
+        weights.append(grid_weights)
 
+        for p1_w_phase, p2_w_phase in zip(parent_weights[0][1:], parent_weights[1][1:]):
+            phase = []
+            for p1, p2 in zip(p1_w_phase, p2_w_phase):
+                selection = random.randint(0, 1)
+                if selection:
+                    phase.append(p1)
+                else:
+                    phase.append(p2)
+            weights.append(phase)
+
+        return weights
+    
+
+    # create offspring from two parent players
+    def breed(self, parent_1, parent_2):
+        children = []
+        
+        # track player index in family for later comparisons
+        index_in_family = 1
         parent_weights = [parent_1[3], parent_2[3]]
-        child_1 = [2, 0, [0, 0, 0]]
-        child_1.append(self.gen_player_weights(parent_weights))
-        child_2 = [3, 0, [0, 0, 0]]
-        child_2.append(self.gen_player_weights(parent_weights))
-        child_3 = [4, 0, [0, 0, 0]]
-        child_3.append(self.gen_player_weights(parent_weights))
-        child_4 = [5, 0, [0, 0, 0]]
-        child_4.append(self.gen_player_weights(parent_weights))
 
-        return child_1, child_2, child_3, child_4
+        # create two children through interpolation
+        for i in range(2):
+            index_in_family += 1
+            child = [index_in_family, 0, [0, 0, 0]]
+            child.append(self.gen_player_weights(parent_weights))
+            children.append(child)
+
+        # create two children through crossover
+        for i in range(2):
+            index_in_family += 1
+            child = [index_in_family, 0, [0, 0, 0]]
+            child.append(self.crossover(parent_weights))
+
+        return children
 
 
     # mutate some weights of population members randomly
@@ -205,7 +236,7 @@ class Generation:
         # or mutate x% of genes somewhat
 
     
-    # evaluate family of players and return the best 4
+    # evaluate family of players and return the best four
     def family_co_evaluation(self, family):
         pairs = list(combinations(family, 2))
         for pair in pairs:
@@ -250,13 +281,13 @@ class Generation:
             prob_selection.append(choice)
         random.shuffle(prob_selection)
 
-        # crossover parents to produce 4 children, then mutate
+        # crossover parents to produce four children, then mutate
         families = []
         while len(prob_selection) > 1:
             parent_1 = prob_selection.pop()
             parent_2 = prob_selection.pop()
             parent_1[0], parent_2[0] = 0, 1
-            children = self.crossover(parent_1, parent_2)
+            children = self.breed(parent_1, parent_2)
             family = [parent_1, parent_2]
             family.extend(children)
             families.append(family)
