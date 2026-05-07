@@ -17,5 +17,5 @@ def test_eval():
     time_end = time.time()
 
     time_elapsed = str(round(time_end - time_start, 3)) + " seconds"
-    gen.save_population_to_file("test3_gen1.csv")
-    log.info("Test 1 completed with time %s seconds", time_elapsed)
+    gen.save_population_to_file("test3_gen1.csv", time_elapsed)
+    log.info("Test 1 completed with time %s", time_elapsed)

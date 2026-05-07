@@ -70,8 +70,8 @@ class Generation:
 
     
     # save population to file
-    def save_population_to_file(self, filename, file_dir="learning/saved_generations/",
-                                time_taken="unknown"):
+    def save_population_to_file(self, filename, time_taken="unknown",
+                                file_dir="learning/saved_generations/"):
         if not self.population:
             return 1
         
@@ -88,7 +88,7 @@ class Generation:
             players.writerow(gen_header)
             players.writerow(p_header)
 
-            # write each player as row of sequential values in file
+            # write each player as row of sequential values
             for player in self.population:
                 row = [player[0], player[1]]
                 for score in player[2]:
@@ -224,14 +224,16 @@ class Generation:
     # generate new population based on the fitness of the previous generation
     def next_generation(self):
         new_pop = []
+        pop_count = 0
 
-        # keeps the top 10% of the population so good players don't disappear
+        # keep the top 10% of the population so good players don't disappear
         pop = sorted(self.population, key=lambda player: player[1], reverse=True)
         elitist_selection = pop[:int(len(pop)*0.1)]
-        for i, player in enumerate(elitist_selection):
-            new_pop.append([i+1, 0, [0, 0, 0], player[3]])
+        for player in elitist_selection:
+            pop_count += 1
+            new_pop.append([pop_count, 0, [0, 0, 0], player[3]])
 
-        # select 50% (rounded down) of the population for parents
+        # select 50% (rounded down) of the population for parents by fitness
         # fitness^4 is used for weighting so that higher fitness players are selected more frequently
         # the * 10 in (choice[1]*10)**4 is for testing readability
         # this may also ensure floating point precision issues are avoided
@@ -259,11 +261,15 @@ class Generation:
             family.extend(children)
             families.append(family)
 
+        # if fitness selection is odd, insert remaining player
+        if prob_selection:
+            pop_count += 1
+            new_pop.append([pop_count, 0, [0, 0, 0], prob_selection[0][3]])
+
         # execute family evaluation and trimming in parallel
         with Pool() as pool:
             trimmed_families = pool.map(self.family_co_evaluation, families)
 
-        pop_count = len(new_pop)
         for family in trimmed_families:
             for player in family:
                 pop_count += 1
