@@ -248,10 +248,19 @@ class Generation:
 
     # mutate some weights of a player randomly via one of two methods
     def mutate(self, player, method=0):
-        mv = self.mutation_scale
         mutated_player = [player[0], player[1], [0, 0, 0]]
         mutated_weights = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        
+        mv = self.mutation_scale
+        if self.generation >= 10:
+            mv *= (100 - self.generation) / 100
+        elif self.generation >= 50:
+            mv *= 0.5
+        elif self.generation >= 80:
+            mv *= 0.3
+        elif self.generation < 90:
+            mv *= 0.3        
 
         # randomly select elements to mutate significantly
         if method == 0:
@@ -348,8 +357,13 @@ class Generation:
             for player in family:
                 mutation = random.random()
                 if mutation < self.mutation_incidence:
-                    mutated_player = self.mutate(player)
-                    mutated_family.append(mutated_player)
+                    mutation_type = random.random()
+                    if mutation_type < 0.75:
+                        mutated_player = self.mutate(player)
+                        mutated_family.append(mutated_player)
+                    else:
+                        mutated_player = self.mutate(player, 1)
+                        mutated_family.append(mutated_player)
                 else:
                     mutated_family.append(player)
             families.append(mutated_family)
