@@ -28,29 +28,26 @@ def evolve(filename="temp", generations=1, board_size=8):
     gen.save_population_to_file(file_n, [datetime_start_old, str(datetime.datetime.now()), "n/a"])
     
     # main evolution loop
-    # calculates datetimes and time elapsed for a generation initially
-    # as when the fitness evaluation began for the previous generation,
-    # then updates them when it updates player fitnesses
+    # calculates datetimes and time elapsed for a generation initially as when
+    # the next_generation() function was called, then updates once fitness evaluation is complete
     for i in range(generations):
         print("Running evolution of " + file_n + " generation " + str(gen.generation) + "...")
         gen.load_population_from_file(file_n)
         datetime_start = str(datetime.datetime.now())
 
-        time_start = time.time()
         gen.evaluate_fitness()
         time_elapsed = str(round(time.time() - time_start_old, 3)) + " seconds"
 
         gen.save_population_to_file(file_n, [datetime_start_old, str(datetime.datetime.now()), time_elapsed])
         log.info("Evaluated fitness of %s", file_n)
 
+        time_start = time.time()
         gen.next_generation()
+        time_elapsed = str(round(time.time() - time_start, 3)) + " seconds"
         log.info("Produced generation %d from %s", gen.generation, file_n)
 
-        datetime_end = str(datetime.datetime.now())
-        time_elapsed = str(round(time.time() - time_start, 3)) + " seconds"
         file_n = filename + "_gen_" + str(gen.generation) + ".csv"
-
-        gen.save_population_to_file(file_n, [datetime_start, datetime_end, time_elapsed])
+        gen.save_population_to_file(file_n, [datetime_start, str(datetime.datetime.now()), time_elapsed])
         log.info("Saved generation %d to %s", gen.generation, file_n)
         datetime_start_old = datetime_start
         time_start_old = time_start

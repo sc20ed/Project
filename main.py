@@ -55,7 +55,7 @@ def evolutionary_learning_cli():
         elif option == 2:
             filename = input("Enter filename of population to evolve (without extension): ")
             generations = int(input("Enter number of generations to compute: "))
-            while size not in range(1, 101):
+            while generations not in range(1, 101):
                 print("\nNumber of generations must be between 1 and 100.")
                 generations = int(input("\nEnter number of generations to compute: "))
             board_size = int(input("Enter board size: "))
