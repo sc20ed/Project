@@ -331,7 +331,7 @@ class Generation:
             mutated_family = []
             for player in family:
                 mutation = random.random()
-                if mutation < self.mutation_incidence:
+                if mutation < self.mutation_incidence or False:
                     mutated_player = self.mutate(player)
                     mutated_family.append(mutated_player)
                 else:
