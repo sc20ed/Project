@@ -10,7 +10,7 @@ log = logging.getLogger("generation.py")
 
 # object to handle generation of player populations through evolutionary learning
 class Generation:
-    def __init__(self, pop_to_load=None, board_size=8, depth=2, n_game_sets=2):
+    def __init__(self, pop_to_load=None, board_size=8, fix_grid_weights=False, depth=2, n_game_sets=2):
         self.generation = 0
         self.population = []
         self.board_size = board_size
@@ -20,6 +20,7 @@ class Generation:
         self.mutation_incidence = 0.5
         self.mutation_rate = 0.2
         self.mutation_scale = 1
+        self.fix_grid_weights = fix_grid_weights
         self.guide_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
                              [-0.5, 1, 2, 2, 1], [0.5, 1, 2, 1, 1], [1.5, 1, 2, 0.5, 1]]
 
@@ -49,12 +50,16 @@ class Generation:
         
         # separated grid weights and weight phases as grid weights should be separately tunable
         # additionally, the corner is not allowed below 500, as this is intuitively bad
-        grid_weights = []
-        for floor, ceiling in zip(base_weights[0][0], base_weights[1][0]):
-            if floor >= ceiling:
-                floor, ceiling = ceiling, floor
-            value = random.randint(floor, ceiling)
-            grid_weights.append(value)
+        if self.fix_grid_weights:
+            grid_weights = self.guide_weights[0]
+        else:
+            grid_weights = []
+            for floor, ceiling in zip(base_weights[0][0], base_weights[1][0]):
+                if floor >= ceiling:
+                    floor, ceiling = ceiling, floor
+                value = random.randint(floor, ceiling)
+                grid_weights.append(value)
+
         weights.append(grid_weights)
 
         for f_w_phase, c_w_phase in zip(base_weights[0][1:], base_weights[1][1:]):
@@ -74,7 +79,7 @@ class Generation:
                                base_weight_floor=[[500, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000, -1000],
                                                   [-3, -3, -3,-3,-3], [-3, -3,-3,-3,-3], [-3, -3, -3, -3, -3]],
                                base_weight_ceiling=[[5000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
-                                                    [3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]],):
+                                                    [3, 3, 3, 3, 3], [3, 3, 3, 3, 3], [3, 3, 3, 3, 3]]):
         self.generation = 0
         self.population.clear()
         base_weights = [base_weight_floor, base_weight_ceiling]
@@ -264,12 +269,15 @@ class Generation:
 
         # randomly select elements to mutate significantly
         if method == 0:
-            for i in range(10):
-                mutation = random.random()
-                if mutation < self.mutation_rate:
-                    mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv, mv))
-                else:
-                    mutated_weights[0][i] = int(player[3][0][i])
+            if self.fix_grid_weights:
+                mutated_weights[0] = self.guide_weights[0]
+            else:
+                for i in range(10):
+                    mutation = random.random()
+                    if mutation < self.mutation_rate:
+                        mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv, mv))
+                    else:
+                        mutated_weights[0][i] = int(player[3][0][i])
 
             for i in range(1, 4):
                 for j in range(5):
@@ -281,8 +289,11 @@ class Generation:
     
         # mutate all elements by a smaller amount
         elif method == 1:
-            for i in range(10):
-                mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv/4, mv/4))
+            if self.fix_grid_weights:
+                mutated_weights[0] = self.guide_weights[0]
+            else:
+                for i in range(10):
+                    mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv/4, mv/4))
 
             for i in range(1, 4):
                 for j in range(5):
