@@ -125,7 +125,7 @@ class Generation:
         file_path = file_dir + filename
         with open(file_path, mode='r', newline='') as file:
             players = csv.reader(file, delimiter=' ', quoting=csv.QUOTE_NONNUMERIC)
-            self.generation = int(next(players, None)[0][-1])
+            self.generation = int(next(players, None)[0][11:])
             next(players, None)
             
             for row in players:
