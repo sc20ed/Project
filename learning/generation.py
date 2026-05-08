@@ -236,11 +236,12 @@ class Generation:
             child.append(self.gen_player_weights(parent_weights))
             children.append(child)
 
-        # create two children through NOTcrossover
+        # create two children through crossover
         for i in range(2):
             index_in_family += 1
             child = [index_in_family, 0, [0, 0, 0]]
-            child.append(self.gen_player_weights(parent_weights))
+            child.append(self.crossover(parent_weights))
+            children.append(child)
 
         return children
 
@@ -267,7 +268,7 @@ class Generation:
                     if mutation < self.mutation_rate:
                         mutated_weights[i][j] = round(player[3][i][j] + random.uniform(-mv, mv), 2)
                     else:
-                        mutated_weights[i][j] = player[3][i][i]
+                        mutated_weights[i][j] = player[3][i][j]
     
         # mutate all elements by a smaller amount
         elif method == 1:
@@ -373,7 +374,3 @@ class Generation:
     
         self.population = new_pop
         self.generation += 1
-        
-        for row in new_pop:
-            print("")
-            print(row)
