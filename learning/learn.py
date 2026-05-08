@@ -11,7 +11,8 @@ def generate_players(filename="temp", size=100):
     file = filename + ".csv"
     gen = Generation()
     gen.gen_initial_population(size)
-    gen.save_population_to_file(file)
+    current_datetime = str(datetime.datetime.now())
+    gen.save_population_to_file(file, [current_datetime, str(datetime.datetime.now()), "n/a"])
     log.info("Saved population of size %d to %s", size, filename)
 
 
@@ -22,14 +23,17 @@ def evolve(filename="temp", generations=1, board_size=8):
     gen.load_population_from_file(file)
 
     file_n = filename + "_gen_" + str(gen.generation) + ".csv"
-    gen.save_population_to_file(file_n)
-
+    datetime_start_old = str(datetime.datetime.now())
+    gen.save_population_to_file(file_n, [datetime_start_old, str(datetime.datetime.now()), "n/a"])
+    
+    # main evolution loop
     for i in range(generations):
         print("Running evolution of " + file_n + " generation " + str(gen.generation) + "...")
         gen.load_population_from_file(file_n)
         datetime_start = str(datetime.datetime.now())
         time_start = time.time()
         gen.evaluate_fitness()
+        gen.save_population_to_file(file_n, [datetime_start_old, datetime_end, time_elapsed])
         log.info("Evaluated fitness of %s", file_n)
         gen.next_generation()
         log.info("Produced generation %d from %s", gen.generation, file_n)
@@ -38,6 +42,7 @@ def evolve(filename="temp", generations=1, board_size=8):
         time_elapsed = str(round(time_end - time_start, 3)) + " seconds"
         file_n = filename + "_gen_" + str(gen.generation) + ".csv"
         gen.save_population_to_file(file_n, [datetime_start, datetime_end, time_elapsed])
+        datetime_start_old = datetime_start
         log.info("Saved generation %d to %s", gen.generation, file_n)
 
 
