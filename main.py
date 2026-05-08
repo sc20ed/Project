@@ -63,7 +63,7 @@ def evolutionary_learning_cli():
                 print("\nBoard size must be either 8, 10, or 12.")
                 board_size = int(input("\nEnter board size: "))
             evolve(filename, generations, board_size)
-            print("Completed evolution of " + generations + " generations for " + filename + ".csv.")
+            print("Completed evolution of " + str(generations) + " generations for " + filename + ".csv.")
 
         # evaluate fitness for a population separate from evolve loop
         elif option == 3:
