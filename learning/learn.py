@@ -33,7 +33,7 @@ def evolve(filename="temp", generations=1, board_size=8):
     for i in range(generations):
         print("Running evolution of " + file_n + " generation " + str(gen.generation) + "...")
         gen.load_population_from_file(file_n)
-        
+
         gen.evaluate_fitness()
         time_elapsed = str(round(time.time() - time_start_old, 3)) + " seconds"
         gen.save_population_to_file(file_n, [datetime_start_old, str(datetime.datetime.now()), time_elapsed])
@@ -50,6 +50,15 @@ def evolve(filename="temp", generations=1, board_size=8):
         log.info("Saved generation %d to %s", gen.generation, file_n)
         datetime_start_old = datetime_start
         time_start_old = time_start
+    
+    # evaluate the final generation
+    gen.load_population_from_file(file_n)
+    gen.evaluate_fitness()
+    time_elapsed = str(round(time.time() - time_start_old, 3)) + " seconds"
+    gen.save_population_to_file(file_n, [datetime_start_old, str(datetime.datetime.now()), time_elapsed])
+    log.info("Evaluated fitness of %s", file_n)
+
+    
 
 
 # evaluate population fitness separately

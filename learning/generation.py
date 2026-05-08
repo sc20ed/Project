@@ -236,11 +236,11 @@ class Generation:
             child.append(self.gen_player_weights(parent_weights))
             children.append(child)
 
-        # create two children through crossover
+        # create two children through NOTcrossover
         for i in range(2):
             index_in_family += 1
             child = [index_in_family, 0, [0, 0, 0]]
-            child.append(self.crossover(parent_weights))
+            child.append(self.gen_player_weights(parent_weights))
 
         return children
 
