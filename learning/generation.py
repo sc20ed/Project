@@ -338,10 +338,13 @@ class Generation:
                     mutated_family.append(player)
             families.append(mutated_family)
 
-        # if fitness selection is odd, insert remaining player
+        # if fitness selection is odd, insert remaining player clean and mutated
         if prob_selection:
             pop_count += 1
             new_pop.append([pop_count, 0, [0, 0, 0], prob_selection[0][3]])
+            mutated_player = self.mutate(prob_selection.pop())
+            pop_count += 1
+            new_pop.append([pop_count, 0, [0, 0, 0], mutated_player[3]])
 
         # execute family evaluation and trimming in parallel
         with Pool() as pool:
