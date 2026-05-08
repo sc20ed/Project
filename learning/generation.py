@@ -18,7 +18,6 @@ class Generation:
         self.n_game_sets = n_game_sets
         self.crossover_rate = 0.8
         self.mutation_incidence = 0.5
-        self.mutation_rate = 0.2
         self.mutation_scale = 1
         self.fix_grid_weights = fix_grid_weights
         self.guide_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
@@ -257,47 +256,43 @@ class Generation:
         mutated_weights = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
         
-        mv = self.mutation_scale
-        if self.generation >= 10:
-            mv *= (100 - self.generation) / 100
-        elif self.generation >= 50:
-            mv *= 0.5
-        elif self.generation >= 80:
-            mv *= 0.3
-        elif self.generation < 90:
-            mv *= 0.3        
+        mutation_rate = 0.2
+        if self.generation >= 5:
+            mutation_rate = 0.1
+        elif self.generation >= 15:
+            mutation_rate = 0.05
 
-        # randomly select elements to mutate significantly
+        # randomly select elements to mutate
         if method == 0:
             if self.fix_grid_weights:
                 mutated_weights[0] = self.guide_weights[0]
             else:
                 for i in range(10):
                     mutation = random.random()
-                    if mutation < self.mutation_rate:
-                        mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv, mv))
+                    if mutation < mutation_rate:
+                        mutated_weights[0][i] = random.randint(-1000, 1000)
                     else:
                         mutated_weights[0][i] = int(player[3][0][i])
 
             for i in range(1, 4):
                 for j in range(5):
                     mutation = random.random()
-                    if mutation < self.mutation_rate:
-                        mutated_weights[i][j] = round(player[3][i][j] + random.uniform(-mv, mv), 2)
+                    if mutation < mutation_rate:
+                        mutated_weights[i][j] = round(random.uniform(-3, 3), 2)
                     else:
                         mutated_weights[i][j] = player[3][i][j]
     
-        # mutate all elements by a smaller amount
+        # mutate one random element from each type
         elif method == 1:
             if self.fix_grid_weights:
                 mutated_weights[0] = self.guide_weights[0]
             else:
-                for i in range(10):
-                    mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv/4, mv/4))
+                weight_index = random.randint(0, 9)
+                mutated_weights[0][weight_index] = random.randint(-1000, 1000)
 
-            for i in range(1, 4):
-                for j in range(5):
-                    mutated_weights[i][j] += round(player[3][i][j] + random.uniform(-mv/2, mv/2), 2)
+            phase_index =  random.randint(0, 2)
+            weight_index = random.randint(0, 4)
+            mutated_weights[phase_index][weight_index] += round(random.uniform(-3, 3), 2)
 
         # ensure corner weight is above 500
         if mutated_weights[0][0] < 500:
