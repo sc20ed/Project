@@ -347,26 +347,24 @@ class Generation:
             parent_1 = prob_selection.pop()
             parent_2 = prob_selection.pop()
             parent_1[0], parent_2[0] = 0, 1
-
             children = self.breed(parent_1, parent_2)
             family = [parent_1, parent_2]
-            family.extend(children)
 
-            # mutate members of the family with preset chance
-            mutated_family = []
-            for player in family:
+            # mutate children with preset chance
+            for child in children:
                 mutation = random.random()
                 if mutation < self.mutation_incidence:
                     mutation_type = random.random()
                     if mutation_type < 0.75:
-                        mutated_player = self.mutate(player)
-                        mutated_family.append(mutated_player)
+                        mutated_child = self.mutate(child)
+                        family.append(mutated_child)
                     else:
-                        mutated_player = self.mutate(player, 1)
-                        mutated_family.append(mutated_player)
+                        mutated_child = self.mutate(child, 1)
+                        family.append(mutated_child)
                 else:
-                    mutated_family.append(player)
-            families.append(mutated_family)
+                    family.append(child)
+                    
+            families.append(family)
 
         # if fitness selection is odd, insert remaining player clean and mutated
         if prob_selection:
