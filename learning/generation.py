@@ -26,6 +26,21 @@ class Generation:
         if pop_to_load:
             self.load_population_from_file(pop_to_load)
 
+
+    # copy the weights of a player to avoid reference confusion
+    def get_weights(self, player):
+        weights = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                   [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        
+        for i in range(10):
+            weights[0][i] = player[3][0][i]
+
+        for i in range(1, 4):
+            for j in range(5):
+                weights[i][j] = player[3][i][j]
+
+        return weights
+
     
     # generate set of heuristic weights
     # each weight is randomly distributed around the base value
@@ -233,7 +248,7 @@ class Generation:
     # mutate some weights of a player randomly via one of two methods
     def mutate(self, player, method=0):
         mv = self.mutation_scale
-        mutated_player = [player[0], player[1], player[2]]
+        mutated_player = [player[0], player[1], [0, 0, 0]]
         mutated_weights = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
 
@@ -242,22 +257,22 @@ class Generation:
             for i in range(10):
                 mutation = random.random()
                 if mutation < self.mutation_rate:
-                    mutated_weights[0][i] += int(player[3][0][i] + player[3][0][i] * random.uniform(-mv, mv))
+                    mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv, mv))
                 else:
-                    mutated_weights[0][i] += int(player[3][0][i])
+                    mutated_weights[0][i] = int(player[3][0][i])
 
             for i in range(1, 4):
                 for j in range(5):
                     mutation = random.random()
                     if mutation < self.mutation_rate:
-                        mutated_weights[i][j] += round(player[3][i][j] + random.uniform(-mv, mv), 2)
+                        mutated_weights[i][j] = round(player[3][i][j] + random.uniform(-mv, mv), 2)
                     else:
-                        mutated_weights[i][j] += int(player[3][i][i])
+                        mutated_weights[i][j] = player[3][i][i]
     
         # mutate all elements by a smaller amount
         elif method == 1:
             for i in range(10):
-                mutated_weights[0][i] += int(player[3][0][i] + player[3][0][i] * random.uniform(-mv/4, mv/4))
+                mutated_weights[0][i] = int(player[3][0][i] + 500 * random.uniform(-mv/4, mv/4))
 
             for i in range(1, 4):
                 for j in range(5):
@@ -298,7 +313,7 @@ class Generation:
         elitism_selection = pop[:elt_cut]
         for player in elitism_selection:
             pop_count += 1
-            new_pop.append([pop_count, 0, [0, 0, 0], player[3]])
+            new_pop.append([pop_count, 0, [0, 0, 0], self.get_weights(player)])
 
         # select 50% (minus the elitism selection) of the population for parents by fitness
         # fitness^4 is used for weighting so that higher fitness players are selected more frequently
@@ -331,7 +346,7 @@ class Generation:
             mutated_family = []
             for player in family:
                 mutation = random.random()
-                if mutation < self.mutation_incidence and False:
+                if mutation < self.mutation_incidence:
                     mutated_player = self.mutate(player)
                     mutated_family.append(mutated_player)
                 else:
@@ -341,10 +356,11 @@ class Generation:
         # if fitness selection is odd, insert remaining player clean and mutated
         if prob_selection:
             pop_count += 1
-            new_pop.append([pop_count, 0, [0, 0, 0], prob_selection[0][3]])
-            mutated_player = self.mutate(prob_selection.pop())
+            mutated_player = self.mutate(prob_selection[0], 0)
+            new_pop.append([pop_count, 0, [0, 0, 0], self.get_weights(mutated_player)])
+            mutated_player = self.mutate(prob_selection.pop(), 1)
             pop_count += 1
-            new_pop.append([pop_count, 0, [0, 0, 0], mutated_player[3]])
+            new_pop.append([pop_count, 0, [0, 0, 0], self.get_weights(mutated_player)])
 
         # execute family evaluation and trimming in parallel
         with Pool() as pool:
@@ -353,7 +369,11 @@ class Generation:
         for family in trimmed_families:
             for player in family:
                 pop_count += 1
-                new_pop.append([pop_count, 0, [0, 0, 0], player[3]])
+                new_pop.append([pop_count, 0, [0, 0, 0], self.get_weights(player)])
     
         self.population = new_pop
         self.generation += 1
+        
+        for row in new_pop:
+            print("")
+            print(row)
