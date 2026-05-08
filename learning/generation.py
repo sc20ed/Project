@@ -322,16 +322,9 @@ class Generation:
     def next_generation(self):
         new_pop = []
         pop_count = 0
-
-        # keep the top 10% of the population so good players don't disappear
         pop = sorted(self.population, key=lambda player: player[1], reverse=True)
-        elt_cut = int(len(pop)*0.1)
-        elitism_selection = pop[:elt_cut]
-        for player in elitism_selection:
-            pop_count += 1
-            new_pop.append([pop_count, 0, [0, 0, 0], self.get_weights(player)])
-
-        # select 50% (minus the elitism selection) of the population for parents by fitness
+        
+        # select 50% of the population for parents by fitness
         # fitness^4 is used for weighting so that higher fitness players are selected more frequently
         # the * 10 in (choice[1]*10)**4 is for testing readability
         # this may also ensure floating point precision issues are avoided
@@ -339,7 +332,7 @@ class Generation:
         fitness_weights = []     
         for player in pop:
             fitness_weights.append((player[1]*10)**4)
-        for i in range(int((len(pop) - elt_cut)/2)): 
+        for i in range(int(len(pop)/2)): 
             choice = random.choices(pop, fitness_weights, k=1)[0]
             pop.remove(choice)
             fitness_weights.remove((choice[1]*10)**4)
@@ -354,6 +347,7 @@ class Generation:
             parent_1 = prob_selection.pop()
             parent_2 = prob_selection.pop()
             parent_1[0], parent_2[0] = 0, 1
+
             children = self.breed(parent_1, parent_2)
             family = [parent_1, parent_2]
             family.extend(children)
