@@ -44,34 +44,51 @@ def evolutionary_learning_cli():
         # create initial population and save to file
         if option == 1:
             filename = input("Enter filename for population (without extension): ")
+
             size = int(input("Enter population size: "))
             while size not in range(2, 101):
                 print("\nPopulation size must be between 2 and 100.")
                 size = int(input("\nEnter population size: "))
+
             generate_players(filename, size)
             print("Saved population to file " + filename + ".csv.")
 
         # evolve population from a starting file
         elif option == 2:
             filename = input("Enter filename of population to evolve (without extension): ")
+
             generations = int(input("Enter number of generations to compute: "))
             while generations not in range(1, 101):
                 print("\nNumber of generations must be between 1 and 100.")
                 generations = int(input("\nEnter number of generations to compute: "))
+
             board_size = int(input("Enter board size: "))
             while board_size not in range(8, 14, 2):
                 print("\nBoard size must be either 8, 10, or 12.")
                 board_size = int(input("\nEnter board size: "))
-            evolve(filename, generations, board_size)
+
+            fix_grid_weights = str(input("Fix grid weights? [y/n]: ")).lower()
+            while fix_grid_weights not in ['y', 'n']:
+                print("\nOption must be either 'y' or 'n'.")
+                fix_grid_weights = str(input("Fix grid weights? [y/n]: ")).lower()
+
+            if fix_grid_weights == 'y':
+                fix_grid_weights = True
+            else:
+                fix_grid_weights = False
+
+            evolve(filename, generations, board_size, fix_grid_weights)
             print("Completed evolution of " + str(generations) + " generations for " + filename + ".csv.")
 
         # evaluate fitness for a population separate from evolve loop
         elif option == 3:
             filename = input("Enter filename of population to evaluate (without extension): ")
+
             board_size = int(input("Enter board size: "))
             while board_size not in range(8, 14, 2):
                 print("\nBoard size must be either 8, 10, or 12.")
                 board_size = int(input("\nEnter board size: "))
+                
             print("Running fitness evaluation for " + filename + ".csv...")
             standalone_fitness_evaluation(filename, board_size)
             print("Completed fitness evaluation.")

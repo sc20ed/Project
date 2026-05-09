@@ -17,10 +17,9 @@ def generate_players(filename="temp", size=100):
 
 
 # evolve population of players for a given number of generations and save each generation to new file
-def evolve(filename="temp", generations=1, board_size=8):
+def evolve(filename="temp", generations=1, board_size=8, fix_grid_weights=False):
     file = filename + ".csv"
-    gen = Generation()
-    gen.load_population_from_file(file)
+    gen = Generation(filename, fix_grid_weights)
 
     file_n = filename + "_gen_" + str(gen.generation) + ".csv"
     datetime_start_old = str(datetime.datetime.now())
