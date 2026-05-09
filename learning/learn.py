@@ -7,9 +7,9 @@ log = logging.getLogger("learn.py")
 
 
 # generate initial population and save to file
-def generate_players(filename="temp", size=100):
+def generate_players(filename="temp", size=100, fix_grid_weights=False):
     file = filename + ".csv"
-    gen = Generation()
+    gen = Generation(None, 8, fix_grid_weights)
     gen.gen_initial_population(size)
     current_datetime = str(datetime.datetime.now())
     gen.save_population_to_file(file, [current_datetime, str(datetime.datetime.now()), "n/a"])
@@ -19,7 +19,7 @@ def generate_players(filename="temp", size=100):
 # evolve population of players for a given number of generations and save each generation to new file
 def evolve(filename="temp", generations=1, board_size=8, fix_grid_weights=False):
     file = filename + ".csv"
-    gen = Generation(filename, fix_grid_weights)
+    gen = Generation(file, board_size, fix_grid_weights)
 
     file_n = filename + "_gen_" + str(gen.generation) + ".csv"
     datetime_start_old = str(datetime.datetime.now())

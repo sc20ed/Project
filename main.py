@@ -50,7 +50,17 @@ def evolutionary_learning_cli():
                 print("\nPopulation size must be between 2 and 100.")
                 size = int(input("\nEnter population size: "))
 
-            generate_players(filename, size)
+            fix_grid_weights = str(input("Fix grid weights? [y/n]: ")).lower()
+            while fix_grid_weights not in ['y', 'n']:
+                print("\nOption must be either 'y' or 'n'.")
+                fix_grid_weights = str(input("Fix grid weights? [y/n]: ")).lower()
+
+            if fix_grid_weights == 'y':
+                fix_grid_weights = True
+            else:
+                fix_grid_weights = False
+
+            generate_players(filename, size, fix_grid_weights)
             print("Saved population to file " + filename + ".csv.")
 
         # evolve population from a starting file
