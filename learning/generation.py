@@ -287,12 +287,17 @@ class Generation:
             if self.fix_grid_weights:
                 mutated_weights[0] = self.guide_weights[0]
             else:
+                for i in range(10):
+                    mutated_weights[0][i] = int(player[3][0][i])
                 weight_index = random.randint(0, 9)
                 mutated_weights[0][weight_index] = random.randint(-1000, 1000)
 
-            phase_index =  random.randint(0, 2)
+            for i in range(1, 4):
+                for j in range(5):
+                    mutated_weights[i][j] = player[3][i][j]
+            phase_index =  random.randint(1, 3)
             weight_index = random.randint(0, 4)
-            mutated_weights[phase_index][weight_index] += round(random.uniform(-3, 3), 2)
+            mutated_weights[phase_index][weight_index] = round(random.uniform(-3, 3), 2)
 
         # ensure corner weight is above 500
         if mutated_weights[0][0] < 500:
