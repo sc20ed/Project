@@ -159,10 +159,11 @@ def run_game(size=8, p1_type=0, p1_depth=0, p1_weights=None,
 # run test game based on arguments
 # the board position is printed to the command line each turn
 # p_type arguments represent the method used for move selection
-def run_game_test(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_moves=0):
+def run_game_test(size=8, p1_type=0, p1_depth=0, p1_weights=None,
+                  p2_type=0, p2_depth=0, p2_weights=None, n_random_moves=0):
 
     # initialise board representation
-    board = Board(size)
+    board = Board(size, p1_weights, p2_weights)
 
     # play random starting moves
     if n_random_moves > 0:

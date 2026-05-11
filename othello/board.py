@@ -6,10 +6,14 @@ log = logging.getLogger("board.py")
 
 # object to handle current board, game state and heuristics
 class Board:
-    def __init__(self, size=8, p1_weights=[[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
-                                           [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]],
-                               p2_weights=[[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
-                                           [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]):
+    def __init__(self, size=8, p1_weights=None, p2_weights=None):
+        if p1_weights == None:
+            p1_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                          [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
+        if p2_weights == None:
+            p2_weights = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                          [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
+
         self.board = []
         self.unmake_list = []
         self.size = size + 2
