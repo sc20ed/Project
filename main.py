@@ -1,5 +1,5 @@
 from learning.learn import generate_players, evolve, standalone_fitness_evaluation
-from othello.game import run_game, run_game_test
+from othello.game import run_game, run_game_test, run_game_series
 import logging
 
 # create log and set config
@@ -118,12 +118,13 @@ def evolutionary_learning_cli():
 # CLI for selecting evolutionary learning, game type and logging level
 def main():
     option = None
-    while option != 5:
+    while option != 6:
         print("\n1: Evolutionary Learning menu" \
               "\n2: CPU vs CPU game" \
               "\n3: Player vs CPU game" \
-              "\n4: Set logging level" \
-              "\n5: Exit")
+              "\n4: Record CPU vs CPU series results" \
+              "\n5: Set logging level" \
+              "\n6: Exit")
         option = int(input("Select an option: "))
 
         # enter evolutionary learning menu
@@ -131,6 +132,8 @@ def main():
             option = evolutionary_learning_cli()
             if option != 5:
                 print("Returning to main menu.")
+            else:
+                option = 6
 
         # cpu vs cpu
         elif option == 2:
@@ -160,13 +163,39 @@ def main():
                 log.info("Player %s win with score %s", winner, score)
             print(f"SCORE: {score[0]} - {score[1]}")
 
-        # change logging level
+
+        # cpu vs cpu series for results
         elif option == 4:
+            log.info("Starting CPU vs CPU series")
+            p1 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                  [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]]
+            p2 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                  [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1], [0.5, 1, 2, 1, 1]]
+            
+            series_results = run_game_series(8, 12, 0, 0, p1, 2, 2, p2, 4)
+
+            p1_win_count, p2_win_count, draw_count = 0, 0, 0
+            for i in range(len(series_results)):
+                if series_results[i][0] == 1:
+                    p1_win_count += 1
+                elif series_results[i][0] == -1:
+                    p2_win_count += 1
+                else:
+                    draw_count += 1
+
+            log.info("Series completed. Results:\n"
+                     "\t\t\t\t\t\t\t\t\t         | Player 1 wins: %d\n" +
+                     "\t\t\t\t\t\t\t\t\t         | Player 2 wins: %d\n" +
+                     "\t\t\t\t\t\t\t\t\t         | Draws: %d",
+                     p1_win_count, p2_win_count, draw_count)
+
+        # change logging level
+        elif option == 5:
             set_logging_level()
             log.info("Logging level set to %s", logging.getLevelName(log.getEffectiveLevel()))
 
         # exit
-        elif option == 5:
+        elif option == 6:
             log.info("User exit")
 
         else:
