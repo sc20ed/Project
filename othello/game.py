@@ -220,8 +220,8 @@ def run_game_test(size=8, p1_type=0, p1_depth=0, p1_weights=None,
 # run series of games based on arguments
 # the board position is printed to the command line each turn
 # p_type arguments represent the method used for move selection
-def run_game_series(size=8, series_length=12, p1_type=0, p1_depth=0, p1_weights=None,
-                  p2_type=0, p2_depth=0, p2_weights=None, n_random_moves=0):
+def run_game_series(size=8, series_length=12, p1_type=0, p1_depth_st=0, p1_weights=None,
+                  p2_type=0, p2_depth_st=0, p2_weights=None, n_random_moves=0):
     
     board_starts_seen = []
     series_results = []
@@ -241,7 +241,7 @@ def run_game_series(size=8, series_length=12, p1_type=0, p1_depth=0, p1_weights=
             # adjust turn order
             if n_random_moves % 2 == 1:
                 p1_type, p2_type = p2_type, p1_type
-                p1_depth, p2_depth = p2_depth, p1_depth
+                p1_depth_st, p2_depth_st = p2_depth_st, p1_depth_st
                 log.debug("Swapped turn order to offset odd number of random moves")
 
         board_starting_position = setup_board.board
@@ -254,6 +254,8 @@ def run_game_series(size=8, series_length=12, p1_type=0, p1_depth=0, p1_weights=
         for i in range(2):
             board = Board(size, p1_weights, p2_weights)
             board.board = deepcopy(board_starting_position)
+            p1_depth = p1_depth_st
+            p2_depth = p2_depth_st
             
             active = 1
             endgame = False
@@ -290,10 +292,13 @@ def run_game_series(size=8, series_length=12, p1_type=0, p1_depth=0, p1_weights=
 
             winner, score = board.game_over()
             game_set_results.append([winner, score])
+            del board
+
+
 
             # swap player colours for next game
             p1_type, p2_type = p2_type, p1_type
-            p1_depth, p2_depth = p2_depth, p1_depth
+            p1_depth_st, p2_depth_st = p2_depth_st, p1_depth_st
             p1_weights, p2_weights = p2_weights, p1_weights
 
         # correct score for player colour swap
