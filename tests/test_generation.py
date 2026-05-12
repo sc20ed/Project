@@ -3,7 +3,7 @@ from learning.generation import Generation
 
 
 # test that population generation, saving and loading functions correctly
-class TestPopulation(unittest.TestCase):
+class TestGeneration(unittest.TestCase):
     def setUp(self):
         self.gen = Generation()
 
@@ -56,26 +56,6 @@ class TestPopulation(unittest.TestCase):
         self.gen.load_population_from_file("test_pop.csv", "tests/test_generations/")
         self.assertEqual(self.gen.population[:3], ex_players)
         self.assertEqual(self.gen.generation, 0)
-
-
-# test that fitness evaluation functions correctly
-class TestEvaluateFitness(unittest.TestCase):
-    def setUp(self):
-        pass
-
-
-    def test_(self):
-        pass
-
-
-# test that creation of the following generation functions correctly
-class TestNextGeneration(unittest.TestCase):
-    def setUp(self):
-        pass
-
-
-    def test_(self):
-        pass
 
 
 if __name__ == "__main__":

@@ -169,11 +169,13 @@ def main():
             log.info("Starting CPU vs CPU series")
             p1 = [[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
                   [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]]
-            p2 = [[1060, 93, -306, -163, 211, 367, 146, -784, 108, 56],
-                  [-0.94, 0.2, -0.5, 2.83, 1.06], [-0.6, 0.09, -0.25, 1.26, 2.1], [-0.64, 0.19, 0.89, 1.13, 1.72]]
+            p2_list = []
+            p2_list.append([[2500, -250, -500, 70, -60, -120, -10, -50, -30, -40],
+                            [-2, 1, 2, 2, 1], [-1, 0.7, 2, 1, 1], [2, 0.5, 2, 1, 3]])
+            depth = 4
             
-            for depth in range(1, 5):
-                series_results = run_game_series(8, 12, 2, depth, p1, 2, depth, p2, 4)
+            for ga_player in p2_list:
+                series_results = run_game_series(8, 10, 4, depth, p1, 4, depth, ga_player, 4)
                 p1_win_count, p2_win_count, draw_count = 0, 0, 0
                 for i in range(len(series_results)):
                     if series_results[i][0] == 1:
@@ -183,11 +185,11 @@ def main():
                     else:
                         draw_count += 1
 
-                log.info("Series completed for depth %d. Results:\n"
+                log.info("Series completed for player %s. Results:\n"
                         "\t\t\t\t\t\t\t\t\t         | Player 1 wins: %d\n" +
                         "\t\t\t\t\t\t\t\t\t         | Player 2 wins: %d\n" +
                         "\t\t\t\t\t\t\t\t\t         | Draws: %d",
-                        depth, p1_win_count, p2_win_count, draw_count)
+                        str(ga_player), p1_win_count, p2_win_count, draw_count)
 
         # change logging level
         elif option == 5:
