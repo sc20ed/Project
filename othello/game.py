@@ -1,6 +1,7 @@
 from othello.board import Board
 from othello.search import minimax, alpha_beta
-from random import randint
+from copy import deepcopy
+import random
 import logging
 
 log = logging.getLogger("game.py")
@@ -16,7 +17,7 @@ def turn(board, p_type, depth=4, endgame=False):
     if p_type == 0:
         moves = board.find_moves(player, opponent)
         if len(moves) > 0:
-            move = moves[randint(0, len(moves)-1)]
+            move = moves[random.randint(0, len(moves)-1)]
             log.debug("Randomly selected move %s", move)
 
     elif p_type == 1:
@@ -69,19 +70,19 @@ def turn(board, p_type, depth=4, endgame=False):
         if board.whose_turn == 1:
             p_wg_score = board.wg_score[0]
             if board.move_count < int(board.max_moves/4):
-                w = board.p1_gp1_weights
+                w = board.p1_weight_phases[0]
             elif board.move_count < int((board.max_moves*2)/3):
-                w = board.p1_gp2_weights
+                w = board.p1_weight_phases[1]
             else:
-                w = board.p1_gp3_weights
+                w = board.p1_weight_phases[2]
         else:
             p_wg_score = board.wg_score[1]
             if board.move_count < int(board.max_moves/4):
-                w = board.p2_gp1_weights
+                w = board.p2_weight_phases[0]
             elif board.move_count < int((board.max_moves*2)/3):
-                w = board.p2_gp2_weights
+                w = board.p2_weight_phases[1]
             else:
-                w = board.p2_gp3_weights
+                w = board.p2_weight_phases[2]
     
         score = board.heuristics()
         w_disc = board.disc_difference * w[0]
@@ -124,7 +125,7 @@ def run_game(size=8, p1_type=0, p1_depth=0, p1_weights=None,
         # adjust turn order
         if n_random_moves % 2 == 1:
             p1_type, p2_type = p2_type, p1_type
-            p1_depth, p2_depth, = p2_depth, p1_depth
+            p1_depth, p2_depth = p2_depth, p1_depth
             log.debug("Swapped turn order to offset odd number of random moves")
 
     # main game loop
@@ -159,10 +160,11 @@ def run_game(size=8, p1_type=0, p1_depth=0, p1_weights=None,
 # run test game based on arguments
 # the board position is printed to the command line each turn
 # p_type arguments represent the method used for move selection
-def run_game_test(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random_moves=0):
+def run_game_test(size=8, p1_type=0, p1_depth=0, p1_weights=None,
+                  p2_type=0, p2_depth=0, p2_weights=None, n_random_moves=0):
 
     # initialise board representation
-    board = Board(size)
+    board = Board(size, p1_weights, p2_weights)
 
     # play random starting moves
     if n_random_moves > 0:
@@ -175,7 +177,7 @@ def run_game_test(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random
         # adjust turn order
         if n_random_moves % 2 == 1:
             p1_type, p2_type = p2_type, p1_type
-            p1_depth, p2_depth, = p2_depth, p1_depth
+            p1_depth, p2_depth = p2_depth, p1_depth
             log.debug("Swapped turn order to offset odd number of random moves")
 
     # main game loop
@@ -213,3 +215,98 @@ def run_game_test(size=8, p1_type=0, p1_depth=0, p2_type=0, p2_depth=0, n_random
             active = 0
 
     return board.game_over()
+
+
+# run series of games based on arguments
+# the board position is printed to the command line each turn
+# p_type arguments represent the method used for move selection
+def run_game_series(size=8, series_length=12, p1_type=0, p1_depth_st=0, p1_weights=None,
+                  p2_type=0, p2_depth_st=0, p2_weights=None, n_random_moves=0):
+    
+    board_starts_seen = []
+    series_results = []
+    while series_length:
+
+        # initialise board representation
+        setup_board = Board(size)
+
+        # play random starting moves
+        if n_random_moves > 0:
+            for i in range(n_random_moves):
+                turn(setup_board, 0, 0, False)
+            log.debug("Set up board with %s random moves", n_random_moves)
+            setup_board.display()
+            print("")
+
+            # adjust turn order
+            if n_random_moves % 2 == 1:
+                p1_type, p2_type = p2_type, p1_type
+                p1_depth_st, p2_depth_st = p2_depth_st, p1_depth_st
+                log.debug("Swapped turn order to offset odd number of random moves")
+
+        board_starting_position = setup_board.board
+        if board_starting_position in board_starts_seen:
+            continue
+        board_starts_seen.append(board_starting_position)
+        game_set_results = []
+        
+        # main game loop x 2, one for each player as each colour
+        for i in range(2):
+            board = Board(size, p1_weights, p2_weights)
+            board.board = deepcopy(board_starting_position)
+            p1_depth = p1_depth_st
+            p2_depth = p2_depth_st
+            
+            active = 1
+            endgame = False
+            while active == 1:
+                moves_remaining = board.max_moves - board.move_count
+                if moves_remaining <= 8:
+                    endgame = True
+                    p1_depth = moves_remaining
+                    p2_depth = moves_remaining
+
+                log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
+                p1_pass = turn(board, p1_type, p1_depth, endgame)
+                print(board.turn_count)
+                board.display()
+                print("")
+                
+                if moves_remaining == 0:
+                    log.debug("Board full, game complete")
+                    break
+
+                log.debug("Player %s, turn %s", (board.whose_turn+3)%3, board.turn_count+1)
+                p2_pass = turn(board, p2_type, p2_depth, endgame)
+                print(board.turn_count)
+                board.display()
+                print("")
+
+                if moves_remaining == 0:
+                    log.debug("Board full, game complete")
+                    break
+                
+                if p1_pass and p2_pass:
+                    log.debug("Neither player can  move, game complete")
+                    active = 0
+
+            winner, score = board.game_over()
+            game_set_results.append([winner, score])
+            del board
+
+
+
+            # swap player colours for next game
+            p1_type, p2_type = p2_type, p1_type
+            p1_depth_st, p2_depth_st = p2_depth_st, p1_depth_st
+            p1_weights, p2_weights = p2_weights, p1_weights
+
+        # correct score for player colour swap
+        game_set_results[1][0] = game_set_results[1][0] * -1
+        corrected_game_1_score = game_set_results[1][1][1], game_set_results[1][1][0]
+        game_set_results[1][1] = corrected_game_1_score
+        series_results.append(game_set_results[0])
+        series_results.append(game_set_results[1])
+        series_length -= 1
+
+    return series_results
