@@ -4,7 +4,7 @@ This project was created as part of the Final Year Project/Dissertation undertak
 
 The aim of the project was to develop an Othello playing program with alpha-beta search and common heuristics to judge the game position, then use a genetic algorithm to create many players that evolve through competing to be part of the makeup of the following generation. Through this I aimed to empirically determine the value of various heuristics and therefore strategies at different stages of the game of Othello for both the current 8x8 board and a future prospective 10x10 board. More information (or access to the report) can be requested via email.
 
-============================================================
+------------------------------------------------------------
 The program runs on Python 3.14.4, and requires no external libraries or dependencies.
 
 Instructions to run:
